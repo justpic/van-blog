@@ -1,9 +1,11 @@
+import { HeadTag } from "../utils/getLayoutProps";
 import { config } from "../utils/loadConfig";
 export type SocialType =
   | "bilibili"
   | "email"
   | "github"
   | "wechat"
+  | "gitee"
   | "wechat-dark";
 export const defaultMenu: MenuItem[] = [
   {
@@ -122,6 +124,8 @@ export interface MetaProps {
     showCopyRight: "true" | "false";
     showRSS: "true" | "false";
     openArticleLinksInNewWindow: "true" | "false";
+    showExpirationReminder: "true" | "false";
+    showEditButton: "true" | "false";
   };
 }
 export interface PublicMetaProp {
@@ -135,6 +139,7 @@ export interface PublicMetaProp {
     css?: string;
     script?: string;
     html?: string;
+    head?: HeadTag[];
   };
 }
 
@@ -178,8 +183,10 @@ const defaultMeta: MetaProps = {
     enableCustomizing: "true",
     showCopyRight: "true",
     showDonateButton: "true",
+    showExpirationReminder: "true",
     showRSS: "true",
     openArticleLinksInNewWindow: "false",
+    showEditButton: "false",
   },
 };
 

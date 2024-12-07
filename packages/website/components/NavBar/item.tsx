@@ -39,8 +39,8 @@ function LinkItemAtom(props: {
         key={item.id}
         className={props.cls ? props.cls : cls}
       >
-        <Link href={item.value}>
-          <a className={props.clsA ? props.clsA : clsA}>{item.name}</a>
+        <Link href={item.value} style={{ height: "100%" }}>
+          <div className={props.clsA ? props.clsA : clsA}>{item.name}</div>
         </Link>
       </li>
     );
@@ -76,7 +76,7 @@ function LinkItemWithChildren(props: { item: MenuItem }) {
             top: 50,
             left: "-4px",
             transform: show ? "scale(100%)" : "scale(0)",
-            zIndex: 999,
+            zIndex: 80,
           }}
           onMouseEnter={() => {
             setHoverSub(true);

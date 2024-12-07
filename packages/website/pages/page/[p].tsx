@@ -6,6 +6,7 @@ import PageNav from "../../components/PageNav";
 import PostCard from "../../components/PostCard";
 import Waline from "../../components/WaLine";
 import { Article } from "../../types/article";
+import { getArticlePath } from "../../utils/getArticlePath";
 import { LayoutProps } from "../../utils/getLayoutProps";
 import { getPagePagesProps } from "../../utils/getPageProps";
 import { getArticlesKeyWord } from "../../utils/keywords";
@@ -36,12 +37,19 @@ const PagePages = (props: PagePagesProps) => {
       <div className="space-y-2 md:space-y-4">
         {props.articles.map((article) => (
           <PostCard
+          
+            showEditButton={props.layoutProps.showEditButton === "true"}
+            setContent={() => {}}
+            showExpirationReminder={
+              props.layoutProps.showExpirationReminder == "true"
+            }
             copyrightAggreement={props.layoutProps.copyrightAggreement}
             openArticleLinksInNewWindow={
               props.layoutProps.openArticleLinksInNewWindow == "true"
             }
+            customCopyRight={null}
             top={article.top || 0}
-            id={article.id}
+            id={getArticlePath(article)}
             key={article.id}
             title={article.title}
             updatedAt={new Date(article.updatedAt)}

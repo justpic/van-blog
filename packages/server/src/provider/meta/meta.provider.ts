@@ -65,8 +65,8 @@ export class MetaProvider {
     const r = /\/post\//;
     const isArticlePath = r.test(pathname);
     if (isArticlePath) {
-      await this.articleProvider.updateViewer(
-        parseInt(pathname.replace('/post/', '')),
+      await this.articleProvider.updateViewerByPathname(
+        pathname.replace('/post/', ''),
         isNewByPath,
       );
     }
@@ -101,6 +101,10 @@ export class MetaProvider {
       {
         label: 'GitHub',
         value: 'github',
+      },
+      {
+        label: 'Gitee',
+        value: 'gitee',
       },
       {
         label: '微信',
@@ -151,10 +155,7 @@ export class MetaProvider {
     // @ts-ignore eslint-disable-next-line @typescript-eslint/ban-ts-comment
     const { name, password, ...updateDto } = updateSiteInfoDto;
     const oldSiteInfo = await this.getSiteInfo();
-    return this.metaModel.updateOne(
-      {},
-      { siteInfo: { ...oldSiteInfo, ...updateDto } },
-    );
+    return this.metaModel.updateOne({}, { siteInfo: { ...oldSiteInfo, ...updateDto } });
   }
 
   async addOrUpdateReward(addReward: Partial<RewardItem>) {

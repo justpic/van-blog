@@ -9,6 +9,7 @@ import { revalidate } from "../utils/loadConfig";
 import Waline from "../components/WaLine";
 import Head from "next/head";
 import { getArticlesKeyWord } from "../utils/keywords";
+import { getArticlePath } from "../utils/getArticlePath";
 export interface IndexPageProps {
   layoutProps: LayoutProps;
   authorCardProps: AuthorCardProps;
@@ -31,12 +32,18 @@ const Home = (props: IndexPageProps) => {
       <div className="space-y-2 md:space-y-4">
         {props.articles.map((article) => (
           <PostCard
+            showEditButton={props.layoutProps.showEditButton === "true"}
+            setContent={() => {}}
+            showExpirationReminder={
+              props.layoutProps.showExpirationReminder == "true"
+            }
             openArticleLinksInNewWindow={
               props.layoutProps.openArticleLinksInNewWindow == "true"
             }
+            customCopyRight={null}
             private={article.private}
             top={article.top || 0}
-            id={article.id}
+            id={getArticlePath(article)}
             key={article.id}
             title={article.title}
             updatedAt={new Date(article.updatedAt)}

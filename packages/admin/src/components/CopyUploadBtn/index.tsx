@@ -1,50 +1,54 @@
-import { getClipboardContents } from '@/services/van-blog/clipboard';
 import { Button, message } from 'antd';
 
-export default function (props: {
-  setLoading: Function;
-  onFinish: Function;
-  onError: Function;
+import { getClipboardContents } from '@/services/van-blog/clipboard';
+
+export interface CopyUploadBtnProps {
   url: string;
   accept: string;
   text: string;
-}) {
-  const handleClick = async (ev) => {
+  setLoading: (loading: boolean) => void;
+  onFinish: (data: unknown) => void;
+  onError: () => void;
+}
+
+export default function (props: CopyUploadBtnProps) {
+  const handleClick = async () => {
     props.setLoading(true);
+
     const fileObj = await getClipboardContents();
+
     if (!fileObj) {
       props.setLoading(false);
       props.onError();
       return;
     }
     const formData = new FormData();
+
     formData.append('file', fileObj);
-    fetch('/api/admin/img/upload', {
+
+    return fetch('/api/admin/img/upload?withWaterMark=true', {
       method: 'POST',
-      body: formData,
       headers: {
-        token: (() => {
-          return window.localStorage.getItem('token') || 'null';
-        })(),
+        token: localStorage.getItem('token') || 'null',
       },
+      body: formData,
     })
-      .then((res) => {
-        return res.json();
-      })
-      .then((res) => {
-        if (res.statusCode == 200) {
-          props?.onFinish(res?.data);
+      .then((res) => res.json())
+      .then(({ statusCode, data }) => {
+        if (statusCode === 200) {
+          props?.onFinish(data);
         } else {
           message.error('上传失败！');
-          // console.log(res);
         }
       })
-      .catch((err) => {
+      .catch(() => {
         message.error('上传失败！');
-        // console.log(err);
       })
-      .finally(() => [props.setLoading(false)]);
+      .finally(() => {
+        props.setLoading(false);
+      });
   };
+
   return (
     <div>
       <Button onClick={handleClick} type="primary">

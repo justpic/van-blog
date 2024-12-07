@@ -13,8 +13,10 @@ import { InitDto } from 'src/types/init.dto';
 import { InitProvider } from 'src/provider/init/init.provider';
 import { ISRProvider } from 'src/provider/isr/isr.provider';
 import { StaticProvider } from 'src/provider/static/static.provider';
+import { ApiToken } from 'src/provider/swagger/token';
 
 @ApiTags('init')
+@ApiToken
 @Controller('/api/admin')
 export class InitController {
   constructor(
@@ -30,7 +32,9 @@ export class InitController {
       throw new HttpException('已初始化', 500);
     }
     await this.initProvider.init(initDto);
-    this.isrProvider.activeAll('初始化触发增量渲染！');
+    this.isrProvider.activeAll('初始化触发增量渲染！', undefined, {
+      forceActice: true,
+    });
     return {
       statusCode: 200,
       message: '初始化成功!',
@@ -39,10 +43,7 @@ export class InitController {
 
   @Post('/init/upload')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadImg(
-    @UploadedFile() file: any,
-    @Query('favicon') favicon: string,
-  ) {
+  async uploadImg(@UploadedFile() file: any, @Query('favicon') favicon: string) {
     const hasInit = await this.initProvider.checkHasInited();
     if (hasInit) {
       throw new HttpException('已初始化', 500);

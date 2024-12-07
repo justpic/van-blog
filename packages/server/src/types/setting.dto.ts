@@ -1,5 +1,14 @@
 import { MenuItem } from './menu.dto';
 
+export const defaultStaticSetting: StaticSetting = {
+  storageType: 'local',
+  picgoConfig: null,
+  enableWaterMark: false,
+  enableWebp: true,
+  waterMarkText: null,
+  picgoPlugins: null,
+};
+
 export type SettingType =
   | 'static'
   | 'https'
@@ -7,20 +16,28 @@ export type SettingType =
   | 'layout'
   | 'login'
   | 'menu'
-  | 'version';
+  | 'version'
+  | 'isr';
+
 export type SettingValue =
   | StaticSetting
   | HttpsSetting
   | WalineSetting
   | LayoutSetting
-  | VersionSetting;
+  | VersionSetting
+  | ISRSetting;
+
+export interface ISRSetting {
+  mode: 'delay' | 'onDemand';
+  delay: number;
+}
 
 export interface MenuSetting {
   data: MenuItem[];
 }
 
 export type StorageType = 'picgo' | 'local';
-export type StaticType = 'img';
+export type StaticType = 'img' | 'customPage';
 export interface LoginSetting {
   enableMaxLoginRetry: boolean;
   maxRetryTimes: number;
@@ -37,9 +54,16 @@ export interface VersionSetting {
 // }
 
 export interface LayoutSetting {
-  customScripts: string;
-  customHtml: string;
-  customCSS: string;
+  script: string;
+  html: string;
+  css: string;
+  head: string;
+}
+
+export interface HeadTag {
+  name: string;
+  props: Record<string, string>;
+  conent: string;
 }
 
 export interface WalineSetting {
@@ -67,9 +91,13 @@ export interface SearchStaticOption {
 }
 export const StoragePath: Record<StaticType, string> = {
   img: `img`,
+  customPage: `customPage`,
 };
 export class StaticSetting {
   storageType: StorageType;
   picgoConfig: any;
   picgoPlugins: string;
+  enableWaterMark: boolean;
+  waterMarkText: string;
+  enableWebp: boolean;
 }

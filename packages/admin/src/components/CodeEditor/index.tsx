@@ -1,27 +1,29 @@
 import MonacoEditor from 'react-monaco-editor';
 import { useModel } from 'umi';
-export default function (props: {
-  value;
-  onChange;
+
+export interface CodeEditorProps {
+  value: string;
+  onChange: (value: string) => void;
   language: string;
-  height?: any;
-  width?: any;
-  style?: any;
-}) {
+  width?: number;
+  height?: number;
+  style?: React.CSSProperties;
+}
+
+export default function ({ style, width, height, language, onChange, value }: CodeEditorProps) {
   const { initialState } = useModel('@@initialState');
+
   return (
-    <div style={props.style || undefined}>
+    <div style={style}>
       <MonacoEditor
-        width={props?.width || undefined}
-        height={props?.height || undefined}
-        language={props.language}
+        width={width}
+        height={height}
+        language={language}
         theme={initialState?.settings?.navTheme == 'light' ? 'vs-light' : 'vs-dark'}
-        value={props.value}
-        // options={options}
+        value={value}
         onChange={(v) => {
-          props.onChange(v);
+          onChange(v);
         }}
-        // editorDidMount={::this.editorDidMount}
       />
     </div>
   );

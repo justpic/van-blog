@@ -26,9 +26,12 @@ export class SiteMapProvider {
     if (this.timer) {
       clearTimeout(this.timer);
     }
-    this.timer = setTimeout(() => {
-      this.generateSiteMapFn(info);
-    }, delay || 60 * 1000);
+    this.timer = setTimeout(
+      () => {
+        this.generateSiteMapFn(info);
+      },
+      delay || 60 * 1000,
+    );
   }
 
   async generateSiteMapFn(info?: string) {
@@ -53,7 +56,7 @@ export class SiteMapProvider {
   async getArticleUrls() {
     const articles = await this.articleProvider.getAll('list', false, false);
     return articles.map((a) => {
-      return `/post/${a.id}`;
+      return `/post/${a.pathname || a.id}`;
     });
   }
   async getCategoryUrls() {
@@ -74,7 +77,7 @@ export class SiteMapProvider {
   async getCustomUrls() {
     const data = await this.customPageProvider.getAll();
     return data.map((c) => {
-      return `/custom${c.path}`;
+      return `/c${c.path}`;
     });
   }
   async getTagUrls() {

@@ -2,18 +2,42 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ChildProcess, spawn } from 'node:child_process';
 import path from 'node:path';
 import { MetaProvider } from '../meta/meta.provider';
+import { SettingProvider } from '../setting/setting.provider';
+
+const ignoreWebsiteWarnings = [
+  'Experimental features are not covered by semver',
+  'You have enabled experimental feature',
+  'Invalid next.config.js options',
+  'The value at .experimental has an',
+  '(node:62) ExperimentalWarning',
+  'null',
+];
+
 @Injectable()
 export class WebsiteProvider {
   // constructor() {}
   ctx: ChildProcess = null;
   logger = new Logger(WebsiteProvider.name);
-  constructor(private metaProvider: MetaProvider) {}
+  constructor(
+    private metaProvider: MetaProvider,
+    private settingProvider: SettingProvider,
+  ) {}
   async init() {
     this.run();
   }
   async loadEnv() {
     const meta = await this.metaProvider.getAll();
-    if (!meta?.siteInfo) return {};
+    const isrConfig = await this.settingProvider.getISRSetting();
+    const isrEnv =
+      isrConfig.mode == 'delay'
+        ? {
+            VAN_BLOG_REVALIDATE: 'true',
+            VAN_BLOG_REVALIDATE_TIME: isrConfig.delay,
+          }
+        : {
+            VAN_BLOG_REVALIDATE: 'false',
+          };
+    if (!meta?.siteInfo) return { ...isrEnv };
     const siteinfo = meta.siteInfo;
     const socials = meta.socials;
     const urls = [];
@@ -21,9 +45,9 @@ export class WebsiteProvider {
       if (!u) return null;
       try {
         const url = new URL(u);
-        if (url?.hostname) {
-          if (!urls.includes(url?.hostname)) {
-            urls.push(url?.hostname);
+        if (url?.host) {
+          if (!urls.includes(url?.host)) {
+            urls.push(url?.host);
           }
         }
       } catch (err) {
@@ -46,13 +70,17 @@ export class WebsiteProvider {
     if (wechatDarkItem) {
       addEach(wechatDarkItem?.value);
     }
-    return { VAN_BLOG_ALLOW_DOMAINS: urls.join(',') };
+    return { VAN_BLOG_ALLOW_DOMAINS: urls.join(','), ...isrEnv };
   }
   async restart(reason: string) {
     this.logger.log(`${reason}重启 website`);
     if (this.ctx) {
       await this.stop();
     }
+  }
+  async restore(reason: string) {
+    this.logger.log(`${reason}`);
+    if (this.ctx) this.ctx = null;
     await this.run();
   }
   async stop(noMessage?: boolean) {
@@ -65,14 +93,20 @@ export class WebsiteProvider {
     }
   }
   async run(): Promise<any> {
-    let cmd = 'dev';
+    if (process.env['VANBLOG_DISABLE_WEBSITE'] === 'true') {
+      this.logger.log('无 website 模式');
+      return;
+    }
+    let cmd = 'pnpm';
+    let args = ['dev'];
     if (process.env.NODE_ENV == 'production') {
-      cmd = 'start';
+      cmd = 'node';
+      args = ['./packages/website/server.js'];
     }
     const loadEnvs = await this.loadEnv();
     this.logger.log(JSON.stringify(loadEnvs, null, 2));
     if (this.ctx == null) {
-      this.ctx = spawn('yarn', [cmd], {
+      this.ctx = spawn(cmd, args, {
         env: {
           ...process.env,
           ...loadEnvs,
@@ -85,10 +119,7 @@ export class WebsiteProvider {
         this.logger.log(message);
       });
       this.ctx.on('exit', async () => {
-        this.ctx = null;
-        this.logger.error('website 意外进程退出，自动重启');
-        await this.stop(true);
-        await this.run();
+        await this.restore('website 进程退出，自动重启');
       });
       this.ctx.stdout.on('data', (data) => {
         const t: string = data.toString();
@@ -97,7 +128,11 @@ export class WebsiteProvider {
       this.ctx.stderr.on('data', (data) => {
         const t: string = data.toString();
 
-        if (!t.includes('You have enabled experimental feature')) {
+        let showLog = true;
+        for (const each of ignoreWebsiteWarnings) {
+          if (t.includes(each)) showLog = false;
+        }
+        if (showLog) {
           this.logger.error(t.substring(0, t.length - 1));
         }
       });

@@ -6,7 +6,6 @@ import ThemeButton from "../ThemeButton";
 import KeyCard from "../KeyCard";
 import { MenuItem } from "../../api/getAllData";
 import AdminButton from "../AdminButton";
-import ImageBoxFuture from "../ImageBoxFuture";
 import { ThemeContext } from "../../utils/themeContext";
 import RssButton from "../RssButton";
 import Item from "./item";
@@ -60,7 +59,7 @@ export default function (props: {
       <div
         id="nav"
         className=" bg-white sticky top-0 dark:bg-dark nav-shadow dark:nav-shadow-dark"
-        style={{ zIndex: 1200 }}
+        style={{ zIndex: 90 }}
       >
         {/* 上面的导航栏 */}
         <div
@@ -97,35 +96,39 @@ export default function (props: {
             </div>
             {props.headerLeftContent == "siteLogo" && (
               <div className="hidden md:block transform translate-x-2">
-                <ImageBoxFuture
+                <img
                   alt="site logo"
                   src={picUrl}
                   width={52}
                   height={52}
-                  className={""}
-                ></ImageBoxFuture>
+                  className=""
+                />
               </div>
             )}
           </div>
           {props.headerLeftContent == "siteName" && (
-            <div className="text-gray-800 select-none text-lg dark:text-dark lg:text-xl font-medium  mr-4 hidden md:block">
-              {props.siteName}
-            </div>
+            <Link href="/">
+              <div className="text-gray-800 cursor-pointer select-none text-lg dark:text-dark lg:text-xl font-medium  mr-4 hidden md:block">
+                {props.siteName}
+              </div>
+            </Link>
           )}
           {/* 第二个flex */}
-          <div className="flex justify-between h-full flex-grow ">
+          <div className="flex justify-between h-full flex-grow nav-content">
             <div
               style={{ transform: "translateX(30px)" }}
-              className=" md:hidden  flex-grow text-center  flex items-center justify-center select-none dark:text-dark"
+              className="cursor-pointer md:hidden  flex-grow text-center  flex items-center justify-center select-none dark:text-dark"
             >
-              <div>{props.siteName}</div>
+              <Link href="/">
+                <div>{props.siteName}</div>
+              </Link>
             </div>
             <ul className=" md:flex h-full items-center  text-sm text-gray-600 dark:text-dark hidden">
               {props.menus.map((m) => {
                 return <Item key={m.id} item={m} />;
               })}
             </ul>
-            <div className="flex">
+            <div className="flex nav-action">
               <div
                 onClick={() => {
                   setShowSearch(true);
@@ -179,7 +182,7 @@ export default function (props: {
                     className="flex items-center h-full md:px-2 hover:text-gray-900 dark:hover:text-dark-hover transform hover:scale-110 cursor-pointer transition-all"
                   >
                     <Link href={`/category/${encodeQuerystring(catelog)}`}>
-                      <a>{catelog}</a>
+                      <div>{catelog}</div>
                     </Link>
                   </li>
                 );

@@ -52,6 +52,7 @@ const Login = () => {
     <div className={styles.container}>
       <div className={styles.content}>
         <LoginForm
+          className={styles.loginForm}
           logo={<img alt="logo" src="/logo.svg" />}
           title="VanBlog"
           subTitle={'VanBlog 博客管理后台'}
@@ -60,13 +61,17 @@ const Login = () => {
           }}
           onFinish={async (values) => {
             const { username, password } = values;
-            await handleSubmit({ username, password: encryptPwd(username, password) });
+            await handleSubmit({
+              username,
+              password: encryptPwd(username, password),
+            });
           }}
         >
           {type === 'account' && (
             <>
               <ProFormText
                 name="username"
+                autoComplete="off"
                 fieldProps={{
                   size: 'large',
                   prefix: <UserOutlined className={styles.prefixIcon} />,
@@ -81,6 +86,7 @@ const Login = () => {
               />
               <ProFormText.Password
                 name="password"
+                autoComplete="off"
                 fieldProps={{
                   size: 'large',
                   prefix: <LockOutlined className={styles.prefixIcon} />,

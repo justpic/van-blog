@@ -1,7 +1,8 @@
 import { getAllCategories, getTags, updateArticle, updateDraft } from '@/services/van-blog/api';
 import { ModalForm, ProFormDateTimePicker, ProFormSelect, ProFormText } from '@ant-design/pro-form';
-import { message, Modal } from 'antd';
+import { Form, message, Modal } from 'antd';
 import moment from 'moment';
+import { useEffect } from 'react';
 import AuthorField from '../AuthorField';
 export default function (props: {
   currObj: any;
@@ -10,8 +11,13 @@ export default function (props: {
   type: 'article' | 'draft' | 'about';
 }) {
   const { currObj, setLoading, type, onFinish } = props;
+  const [form] = Form.useForm();
+  useEffect(() => {
+    if (form && form.setFieldsValue) form.setFieldsValue(currObj);
+  }, [currObj]);
   return (
     <ModalForm
+      form={form}
       title="修改信息"
       trigger={
         <a key="button" type="link">
@@ -115,6 +121,14 @@ export default function (props: {
             label="置顶优先级"
             placeholder="留空或0表示不置顶，其余数字越大表示优先级越高"
           />
+          <ProFormText
+            width="md"
+            id="pathname"
+            name="pathname"
+            label="自定义路径名"
+            tooltip="文章发布后的路径将为 /post/[自定义路径名]，如果未设置则使用文章 id 作为路径名"
+            placeholder="留空或为空则使用 id 作为路径名"
+          />
           <ProFormSelect
             width="md"
             name="private"
@@ -160,6 +174,14 @@ export default function (props: {
                 },
               ];
             }}
+          />
+          <ProFormText
+            width="md"
+            id="copyright"
+            name="copyright"
+            label="版权声明"
+            tooltip="设置后会替换掉文章页底部默认的版权声明文字，留空则根据系统设置中的相关选项进行展示"
+            placeholder="设置后会替换掉文章底部默认的版权"
           />
         </>
       )}

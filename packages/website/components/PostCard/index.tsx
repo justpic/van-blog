@@ -1,8 +1,7 @@
-import Link from "../Link";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import AlertCard from "../AlertCard";
 import CopyRight from "../CopyRight";
-import Markdown from "../Markdown";
 import Reward from "../Reward";
 import TopPinIcon from "../TopPinIcon";
 import UnLockCard from "../UnLockCard";
@@ -10,21 +9,25 @@ import WaLine from "../WaLine";
 import { PostBottom } from "./bottom";
 import { SubTitle, Title } from "./title";
 import { getTarget } from "../Link/tools";
+import TocMobile from "../TocMobile";
+import { hasToc } from "../../utils/hasToc";
+import Markdown from "../Markdown";
 
 export default function (props: {
-  id: number;
+  id: number | string;
   title: string;
   updatedAt: Date;
   createdAt: Date;
   catelog: string;
   content: string;
+  setContent: (content: string) => void;
   type: "overview" | "article" | "about";
   pay?: string[];
   payDark?: string[];
   author?: string;
   tags?: string[];
-  next?: { id: number; title: string };
-  pre?: { id: number; title: string };
+  next?: { id: number; title: string; pathname?: string };
+  pre?: { id: number; title: string; pathname?: string };
   enableComment: "true" | "false";
   top: number;
   private: boolean;
@@ -33,9 +36,12 @@ export default function (props: {
   hideCopyRight?: boolean;
   openArticleLinksInNewWindow: boolean;
   copyrightAggreement: string;
+  customCopyRight: string | null;
+  showExpirationReminder: boolean;
+  showEditButton: boolean;
 }) {
   const [lock, setLock] = useState(props.type != "overview" && props.private);
-  const [content, setContent] = useState(props.content || "");
+  const { content, setContent } = props;
   const showDonate = useMemo(() => {
     if (lock) {
       return false;
@@ -71,12 +77,18 @@ export default function (props: {
     }
   }, [props, lock, content]);
 
+  const showToc = useMemo(() => {
+    if (!hasToc(props.content)) return false;
+    if (props.type == "article") return true;
+    return false;
+  }, [props.type, props.content]);
+
   return (
-    <div>
+    <div className="post-card-wrapper">
       <div
         style={{ position: "relative" }}
         id="post-card"
-        className="overflow-hidden  bg-white card-shadow py-4 px-1 sm:px-3 md:py-6 md:px-5 dark:bg-dark  dark:nav-shadow-dark"
+        className="overflow-hidden post-card bg-white card-shadow py-4 px-1 sm:px-3 md:py-6 md:px-5 dark:bg-dark  dark:nav-shadow-dark"
       >
         {props.top != 0 && <TopPinIcon></TopPinIcon>}
         <Title
@@ -84,6 +96,7 @@ export default function (props: {
           id={props.id}
           title={props.title}
           openArticleLinksInNewWindow={props.openArticleLinksInNewWindow}
+          showEditButton={props.showEditButton}
         />
 
         <SubTitle
@@ -98,6 +111,7 @@ export default function (props: {
         <div className="text-sm md:text-base  text-gray-600 mt-4 mx-2">
           {props.type == "article" && (
             <AlertCard
+              showExpirationReminder={props.showExpirationReminder}
               updatedAt={props.updatedAt}
               createdAt={props.createdAt}
             ></AlertCard>
@@ -109,7 +123,10 @@ export default function (props: {
               id={props.id}
             />
           ) : (
-            <Markdown content={calContent}></Markdown>
+            <>
+              {showToc && <TocMobile content={calContent} />}
+              <Markdown content={calContent}></Markdown>
+            </>
           )}
         </div>
 
@@ -117,15 +134,11 @@ export default function (props: {
           <div className="w-full flex justify-center mt-4 ">
             <Link
               href={`/post/${props.id}`}
-              newTab={props.openArticleLinksInNewWindow}
+              target={getTarget(props.openArticleLinksInNewWindow)}
             >
-              <a
-                href={`/post/${props.id}`}
-                target={getTarget(props.openArticleLinksInNewWindow)}
-                className=" dark:bg-dark dark:hover:bg-dark-light dark:hover:text-dark-r dark:border-dark dark:text-dark hover:bg-gray-800 hover:text-gray-50 border-2 border-gray-800 text-sm md:text-base text-gray-700 px-2 py-1 transition-all rounded"
-              >
+              <div className=" dark:bg-dark dark:hover:bg-dark-light dark:hover:text-dark-r dark:border-dark dark:text-dark hover:bg-gray-800 hover:text-gray-50 border-2 border-gray-800 text-sm md:text-base text-gray-700 px-2 py-1 transition-all rounded">
                 阅读全文
-              </a>
+              </div>
             </Link>
           </div>
         )}
@@ -141,6 +154,7 @@ export default function (props: {
         )}
         {props.type == "article" && !lock && !props?.hideCopyRight && (
           <CopyRight
+            customCopyRight={props.customCopyRight}
             author={props.author as any}
             id={props.id}
             showDonate={showDonate}

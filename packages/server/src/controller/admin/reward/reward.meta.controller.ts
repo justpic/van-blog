@@ -1,21 +1,14 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { RewardDto } from 'src/types/reward.dto';
 import { AdminGuard } from 'src/provider/auth/auth.guard';
 import { ISRProvider } from 'src/provider/isr/isr.provider';
 import { MetaProvider } from 'src/provider/meta/meta.provider';
 import { config } from 'src/config';
+import { ApiToken } from 'src/provider/swagger/token';
 @ApiTags('reward')
 @UseGuards(...AdminGuard)
+@ApiToken
 @Controller('/api/admin/meta/reward')
 export class RewardMetaController {
   constructor(

@@ -92,9 +92,7 @@ export class DraftProvider {
     }
   }
 
-  async getByOption(
-    option: SearchDraftOption,
-  ): Promise<{ drafts: Draft[]; total: number }> {
+  async getByOption(option: SearchDraftOption): Promise<{ drafts: Draft[]; total: number }> {
     const query: any = {};
     const $and: any = [
       {
@@ -120,19 +118,19 @@ export class DraftProvider {
       const or: any = [];
       tags.forEach((t) => {
         or.push({
-          tags: { $regex: `${t}`, $options: '$i' },
+          tags: { $regex: `${t}`, $options: 'i' },
         });
       });
       and.push({ $or: or });
     }
     if (option.category) {
       and.push({
-        category: { $regex: `${option.category}`, $options: '$i' },
+        category: { $regex: `${option.category}`, $options: 'i' },
       });
     }
     if (option.title) {
       and.push({
-        title: { $regex: `${option.title}`, $options: '$i' },
+        title: { $regex: `${option.title}`, $options: 'i' },
       });
     }
     if (option.startTime || option.endTime) {
@@ -204,8 +202,8 @@ export class DraftProvider {
     return this.draftModel
       .find({
         $or: [
-          { content: { $regex: `*${str}*`, $options: '$i' } },
-          { title: { $regex: `*${str}*`, $options: '$i' } },
+          { content: { $regex: `*${str}*`, $options: 'i' } },
+          { title: { $regex: `*${str}*`, $options: 'i' } },
         ],
       })
       .exec();
@@ -219,10 +217,7 @@ export class DraftProvider {
   }
 
   async updateById(id: number, updateDraftDto: UpdateDraftDto) {
-    return this.draftModel.updateOne(
-      { id },
-      { ...updateDraftDto, updatedAt: new Date() },
-    );
+    return this.draftModel.updateOne({ id }, { ...updateDraftDto, updatedAt: new Date() });
   }
 
   async getNewId() {

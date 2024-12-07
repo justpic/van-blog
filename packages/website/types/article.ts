@@ -9,4 +9,6 @@ export interface Article {
   top?: number;
   private: boolean;
   author?: string;
+  copyright?: string;
+  pathname?: string;
 }

@@ -8,7 +8,7 @@ export class Article extends Document {
   @Prop({ index: true, unique: true })
   id: number;
 
-  @Prop()
+  @Prop({ index: true })
   title: string;
 
   @Prop({ default: '' })
@@ -26,8 +26,11 @@ export class Article extends Document {
   @Prop({ default: false, index: true })
   hidden: boolean;
 
-  @Prop()
+  @Prop({ index: true })
   author: string;
+
+  @Prop({ default: '', index: true })
+  pathname: string;
 
   @Prop({ default: false, index: true })
   private: boolean;
@@ -45,9 +48,13 @@ export class Article extends Document {
   visited: number;
 
   @Prop()
+  copyright?: string;
+
+  @Prop()
   lastVisitedTime: Date;
 
   @Prop({
+    index: true,
     default: () => {
       return new Date();
     },
@@ -55,6 +62,7 @@ export class Article extends Document {
   createdAt: Date;
 
   @Prop({
+    index: true,
     default: () => {
       return new Date();
     },

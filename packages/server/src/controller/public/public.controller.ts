@@ -44,22 +44,19 @@ export class PublicController {
     };
   }
   @Get('/article/:id')
-  async getArticleById(@Param('id') id: number) {
-    const data = await this.articleProvider.getByIdWithPreNext(id, 'public');
+  async getArticleByIdOrPathname(@Param('id') id: string) {
+    const data = await this.articleProvider.getByIdOrPathnameWithPreNext(id, 'public');
     return {
       statusCode: 200,
       data: data,
     };
   }
   @Post('/article/:id')
-  async getArticleByIdWithPassword(
-    @Param('id') id: number,
+  async getArticleByIdOrPathnameWithPassword(
+    @Param('id') id: number | string,
     @Body() body: { password: string },
   ) {
-    const data = await this.articleProvider.getByIdWithPassword(
-      id,
-      body?.password,
-    );
+    const data = await this.articleProvider.getByIdWithPassword(id, body?.password);
     return {
       statusCode: 200,
       data: data,
@@ -91,7 +88,7 @@ export class PublicController {
     }
     const data = await this.metaProvider.addViewer(
       isNew,
-      url.pathname,
+      decodeURIComponent(url.pathname),
       isNewByPath,
     );
     return {
@@ -109,7 +106,7 @@ export class PublicController {
     };
   }
   @Get('/article/viewer/:id')
-  async getViewerByArticleId(@Param('id') id: number) {
+  async getViewerByArticleIdOrPathname(@Param('id') id: number | string) {
     const data = await this.visitProvider.getByArticleId(id);
     return {
       statusCode: 200,
@@ -184,6 +181,8 @@ export class PublicController {
   async getBuildMeta() {
     const tags = await this.tagProvider.getAllTags(false);
     const meta = await this.metaProvider.getAll();
+    const metaDoc = (meta as any)?._doc || meta;
+    const categories = await this.categoryProvider.getAllCategories(false);
     const { data: menus } = await this.settingProvider.getMenuSetting();
     const totalArticles = await this.articleProvider.getTotalNum(false);
     const totalWordCount = await this.metaProvider.getTotalWords();
@@ -192,7 +191,10 @@ export class PublicController {
     const data = {
       version: version,
       tags,
-      meta,
+      meta: {
+        ...metaDoc,
+        categories,
+      },
       menus,
       totalArticles,
       totalWordCount,

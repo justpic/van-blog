@@ -5,17 +5,16 @@ import Advance from './tabs/Advance';
 import Backup from './tabs/Backup';
 import Caddy from './tabs/Caddy';
 import Customizing from './tabs/Customizing';
-import CustomPage from './tabs/CustomPage';
 import ImgTab from './tabs/ImgTab';
 import Migrate from './tabs/migrate';
 import SiteInfo from './tabs/SiteInfo';
 import User from './tabs/User';
 import WalineTab from './tabs/WalineTab';
+import Token from './tabs/Token';
 export default function () {
   const tabMap = {
     siteInfo: <SiteInfo />,
     customizing: <Customizing />,
-    customPage: <CustomPage />,
     backup: <Backup />,
     user: <User />,
     img: <ImgTab />,
@@ -23,6 +22,7 @@ export default function () {
     caddy: <Caddy />,
     advance: <Advance />,
     migrate: <Migrate />,
+    token: <Token />,
   };
   const [tab, setTab] = useTab('siteInfo', 'tab');
 
@@ -43,10 +43,6 @@ export default function () {
           key: 'customizing',
         },
         {
-          tab: '自定义页面',
-          key: 'customPage',
-        },
-        {
           tab: '用户设置',
           key: 'user',
         },
@@ -61,6 +57,10 @@ export default function () {
         {
           tab: '备份恢复',
           key: 'backup',
+        },
+        {
+          tab: 'Token 管理',
+          key: 'token',
         },
         {
           tab: 'HTTPS',

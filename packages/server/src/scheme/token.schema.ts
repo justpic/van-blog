@@ -10,10 +10,14 @@ export class Token extends Document {
   @Prop({ index: true })
   token: string;
 
+  @Prop({ index: true })
+  name?: string;
+
   @Prop()
   expiresIn: number;
 
   @Prop({
+    index: true,
     default: () => {
       return new Date();
     },

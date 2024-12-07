@@ -1,114 +1,83 @@
-import { hopeTheme } from "vuepress-theme-hope";
-import navbar from "./navbar";
-import sidebar from "./sidebar";
+import { getDirname, path } from '@vuepress/utils';
+import { hopeTheme } from 'vuepress-theme-hope';
+
+const __dirname = getDirname(import.meta.url);
 
 export default hopeTheme({
-  hostname: "https://vanblog.mereith.com",
+  hostname: 'https://vanblog.mereith.com',
 
-  docsRepo: "Mereithhh/vanblog",
-  docsBranch: "master",
-  docsDir: "docs",
+  docsRepo: 'Mereithhh/vanblog',
+  docsBranch: 'master',
+  docsDir: 'docs',
   author: {
-    name: "Mereith",
-    url: "https://www.mereith.com",
+    name: 'Mereith',
+    url: 'https://www.mereith.com',
   },
 
-  darkmode: "switch",
-  iconAssets: "iconfont",
+  darkmode: 'switch',
+  iconAssets: 'fontawesome-with-brands',
 
-  logo: "/logo.svg",
+  logo: '/logo.svg',
 
-  repo: "mereithhh/van-blog",
+  repo: 'Mereithhh/van-blog',
 
   // navbar
-  navbar: navbar,
+  navbar: [
+    '/intro',
+    '/guide/get-started',
+    '/features/',
+    '/faq/',
+    {
+      text: 'API',
+      icon: 'fas fa-book',
+      link: 'https://blog-demo.mereith.com/swagger',
+    },
+    {
+      text: 'Demo',
+      icon: 'laptop-code',
+      link: 'https://blog-demo.mereith.com',
+    },
+    {
+      text: '交流群',
+      icon: 'fab fa-qq',
+      link: 'https://jq.qq.com/?_wv=1027&k=5NRyK2Sw',
+    },
+  ],
 
-  // sidebar
-  sidebar: sidebar,
+  sidebar: 'structure',
 
-  footer: "GPL-3.0 协议",
+  footer: 'GPL-3.0 协议',
 
   displayFooter: true,
 
-  pageInfo: ["Author", "Original", "Date", "Category", "Tag", "ReadingTime"],
-
-  // blog: {
-  //   description: "一个前端开发者",
-  //   intro: "/intro.html",
-  //   medias: {
-  //     Baidu: "https://example.com",
-  //     Bitbucket: "https://example.com",
-  //     Dingding: "https://example.com",
-  //     Discord: "https://example.com",
-  //     Dribbble: "https://example.com",
-  //     Email: "https://example.com",
-  //     Evernote: "https://example.com",
-  //     Facebook: "https://example.com",
-  //     Flipboard: "https://example.com",
-  //     Gitee: "https://example.com",
-  //     GitHub: "https://example.com",
-  //     Gitlab: "https://example.com",
-  //     Gmail: "https://example.com",
-  //     Instagram: "https://example.com",
-  //     Lines: "https://example.com",
-  //     Linkedin: "https://example.com",
-  //     Pinterest: "https://example.com",
-  //     Pocket: "https://example.com",
-  //     QQ: "https://example.com",
-  //     Qzone: "https://example.com",
-  //     Reddit: "https://example.com",
-  //     Rss: "https://example.com",
-  //     Steam: "https://example.com",
-  //     Twitter: "https://example.com",
-  //     Wechat: "https://example.com",
-  //     Weibo: "https://example.com",
-  //     Whatsapp: "https://example.com",
-  //     Youtube: "https://example.com",
-  //     Zhihu: "https://example.com",
-  //   },
-  // },
-
-  // encrypt: {
-  //   config: {
-  //     "/guide/encrypt.html": ["1234"],
-  //   },
-  // },
+  pageInfo: ['Author', 'Original', 'Date', 'Category', 'Tag', 'ReadingTime'],
 
   plugins: {
-    blog: false,
-    copyCode: {},
-
-    // 如果你不需要评论，可以直接删除 comment 配置，
-    // 以下配置仅供体验，如果你需要评论，请自行配置并使用自己的环境，详见文档。
-    // 为了避免打扰主题开发者以及消耗他的资源，请不要在你的正式环境中直接使用下列配置!!!!!
     comment: {
-      /**
-       * Using Giscus
-       */
-      provider: "Giscus",
-      repo: "mereithhh/vanblog-comment",
-      repoId: "R_kgDOHtQfpQ",
-      category: "Announcements",
-      categoryId: "DIC_kwDOHtQfpc4CQZcs",
-
-      /**
-       * Using Twikoo
-       */
-      // provider: "Twikoo",
-      // envId: "https://twikoo.ccknbc.vercel.app",
-
-      /**
-       * Using Waline
-       */
-      // provider: "Waline",
-      // serverURL: "https://vuepress-theme-hope-comment.vercel.app",
+      provider: 'Giscus',
+      repo: 'mereithhh/vanblog-comment',
+      repoId: 'R_kgDOHtQfpQ',
+      category: 'Announcements',
+      categoryId: 'DIC_kwDOHtQfpc4CQZcs',
     },
 
     mdEnhance: {
-      enableAll: true,
-      presentation: {
-        plugins: ["highlight", "math", "search", "notes", "zoom"],
+      align: true,
+      codetabs: true,
+      figure: true,
+      imgLazyload: true,
+      imgSize: true,
+      include: {
+        deep: true,
+        resolvePath: (filePath, cwd) => {
+          if (filePath.startsWith('@'))
+            return filePath.replace('@', path.resolve(__dirname, '../'));
+
+          return path.resolve(cwd, filePath);
+        },
       },
+      tabs: true,
+      tasklist: true,
     },
   },
 });

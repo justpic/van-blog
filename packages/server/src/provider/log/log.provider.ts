@@ -8,12 +8,15 @@ import lineReader from 'line-reader';
 import { config } from 'src/config';
 import path from 'path';
 import { checkOrCreate } from 'src/utils/checkFolder';
+import { Pipeline } from 'src/scheme/pipeline.schema';
+import { CodeResult } from '../pipeline/pipeline.provider';
 @Injectable()
 export class LogProvider {
   logger = null;
-  logPath= path.join(config.log,"vanblog-event.log");
+  logPath = path.join(config.log, 'vanblog-event.log');
+  systemLogPath = path.join('/var/log/', 'vanblog-stdio.log');
   constructor() {
-    checkOrCreate(config.log)
+    checkOrCreate(config.log);
     const streams = [
       {
         stream: fs.createWriteStream(this.logPath, {
@@ -24,6 +27,24 @@ export class LogProvider {
     ];
     this.logger = pino({ level: 'debug' }, pino.multistream(streams));
     this.logger.info({ event: 'start' });
+  }
+  async runPipeline(
+    pipeline: Pipeline,
+    input: any,
+    result?: CodeResult,
+    error?: Error,
+  ) {
+    this.logger.info({
+      event: EventType.RUN_PIPELINE,
+      pipelineId: pipeline.id,
+      pipelineName: pipeline.name,
+      eventName: pipeline.eventName,
+      success: result?.status == 'success' ? true : false,
+      logs: result?.logs || [],
+      output: result?.output || [],
+      serverError: error?.message || '',
+      input,
+    });
   }
   async login(req: Request, success: boolean) {
     const logger = this.logger;
@@ -45,11 +66,13 @@ export class LogProvider {
         const res = [];
         let total = 0;
         lineReader.eachLine(
-          this.logPath,
+          eventType == EventType.SYSTEM ? this.systemLogPath : this.logPath,
           (line: string, last: boolean) => {
-            const data = JSON.parse(line);
-            // console.log(eventType, data, last);
-            if (data.event == eventType) {
+            let data: any = line;
+            if (eventType !== EventType.SYSTEM) {
+              data = JSON.parse(line);
+            }
+            if (eventType === EventType.SYSTEM || data.event == eventType) {
               total = total + 1;
               if (res.length >= all) {
                 res.shift();

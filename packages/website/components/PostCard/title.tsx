@@ -1,16 +1,19 @@
 import dayjs from "dayjs";
-import Link from "../Link";
+import Link from "next/link";
 import { useMemo } from "react";
 import { encodeQuerystring } from "../../utils/encode";
 import PostViewer from "../PostViewer";
 import { getTarget } from "../Link/tools";
+import { checkLogin } from "../../utils/auth";
 
 export function Title(props: {
   type: "article" | "about" | "overview";
-  id: number;
+  id: number | string;
   title: string;
   openArticleLinksInNewWindow: boolean;
+  showEditButton: boolean;
 }) {
+  const showEditButton = props.showEditButton && checkLogin();
   const newTab = useMemo(() => {
     if (props.type == "overview" && props.openArticleLinksInNewWindow) {
       return true;
@@ -18,25 +21,40 @@ export function Title(props: {
     return false;
   }, [props]);
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center post-card-title ">
       {props.type != "about" ? (
-        <Link href={`/post/${props.id}`} newTab={newTab}>
-          <a
-            target={getTarget(newTab)}
-            href={`/post/${props.id}`}
-            className={`text-lg block font-medium px-5  text-center mb-2 mt-2 dark:text-dark text-gray-700 md:text-${
-              props.type == "overview" ? "xl" : "2xl"
-            } ua ua-link`}
+        <Link href={`/post/${props.id}`} target={getTarget(newTab)} style={{width:"90%"}} title={props.title}>
+          <div
+            className={`text-lg block font-medium overflow-hidden text-ellipsis whitespace-nowrap px-5  text-center mb-2 mt-2 dark:text-dark text-gray-700 ${
+              showEditButton ? "ml-8" : ""
+            } md:text-${props.type == "overview" ? "xl" : "2xl"} ua ua-link`}
           >
             {props.title}
-          </a>
+          </div>
         </Link>
       ) : (
         <div
-          className={`text-lg block font-medium mb-2 mt-2 dark:text-dark text-gray-700 md:text-2xl ua ua-link  select-none`}
+          className={`text-lg block font-medium mb-2 mt-2 dark:text-dark text-gray-700 md:text-2xl ua ua-link  select-none ${
+            showEditButton ? "ml-12 mr-4" : ""
+          }`}
         >
           {props.title}
         </div>
+      )}
+      {showEditButton && (
+        <a
+          className="flex items-center"
+          href={
+            props.type === "about"
+              ? "/admin/editor?type=about"
+              : `/admin/editor?type=article&id=${props.id}`
+          }
+          target="_blank"
+        >
+          <div className=" text-dark dark:text-gray-700">
+            <div>编辑</div>
+          </div>
+        </a>
       )}
     </div>
   );
@@ -47,7 +65,7 @@ export function SubTitle(props: {
   createdAt: Date;
   catelog: string;
   enableComment: "true" | "false";
-  id: number;
+  id: number | string;
   openArticleLinksInNewWindow: boolean;
 }) {
   const iconSize = "16";
@@ -62,7 +80,7 @@ export function SubTitle(props: {
     }
   }, [props]);
   return (
-    <div className="text-center text-xs md:text-sm divide-x divide-gray-400 text-gray-400 dark:text-dark">
+    <div className="text-center text-xs md:text-sm divide-x divide-gray-400 text-gray-400 dark:text-dark post-card-sub-title">
       <span className="inline-flex px-2 items-center">
         <span className={iconClass}>
           <svg
@@ -108,13 +126,9 @@ export function SubTitle(props: {
           </span>
           <Link
             href={`/category/${encodeQuerystring(props.catelog)}`}
-            newTab={props.openArticleLinksInNewWindow}
+            target={getTarget(props.openArticleLinksInNewWindow)}
           >
-            <a
-              href={`/category/${encodeQuerystring(props.catelog)}`}
-              target={getTarget(props.openArticleLinksInNewWindow)}
-              className="cursor-pointer group-hover:text-gray-900 dark:group-hover:text-dark-hover hover:font-medium "
-            >{`${props.catelog}`}</a>
+            <div className="cursor-pointer group-hover:text-gray-900 dark:group-hover:text-dark-hover hover:font-medium ">{`${props.catelog}`}</div>
           </Link>
         </span>
       )}

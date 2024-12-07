@@ -5,9 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import BaiduAnalysis from "../BaiduAnalysis";
 import GaAnalysis from "../gaAnalysis";
 import { LayoutProps } from "../../utils/getLayoutProps";
-import ImageProvider from "../ImageProvider";
+// import ImageProvider from "../ImageProvider";
 import { RealThemeType, ThemeContext } from "../../utils/themeContext";
-import { decodeTheme } from "../../utils/theme";
+import { getTheme } from "../../utils/theme";
 import CustomLayout from "../CustomLayout";
 import { Toaster } from "react-hot-toast";
 import Footer from "../Footer";
@@ -24,7 +24,7 @@ export default function (props: {
   // console.log("script", decode(props.option.customScript as string));
   const [isOpen, setIsOpen] = useState(false);
   const { current } = useRef({ hasInit: false });
-  const [theme, setTheme] = useState<RealThemeType>(decodeTheme("auto"));
+  const [theme, setTheme] = useState<RealThemeType>(getTheme("auto"));
   const handleClose = () => {
     console.log("关闭或刷新页面");
     localStorage.removeItem("saidHello");
@@ -69,7 +69,7 @@ export default function (props: {
         }}
       >
         <Toaster />
-        <ImageProvider>
+        {/* <ImageProvider> */}
           <NavBar
             openArticleLinksInNewWindow={
               props.option.openArticleLinksInNewWindow == "true"
@@ -109,13 +109,14 @@ export default function (props: {
               gaBeianUrl={props.option.gaBeianUrl}
             />
           </div>
-        </ImageProvider>
+        {/* </ImageProvider> */}
       </ThemeContext.Provider>
       {props.option.enableCustomizing == "true" && (
         <CustomLayout
           customCss={props.option.customCss}
           customHtml={props.option.customHtml}
           customScript={props.option.customScript}
+          customHead={props.option.customHead}
         />
       )}
     </>

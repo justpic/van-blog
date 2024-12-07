@@ -37,6 +37,8 @@ export class SiteInfo {
   enableCustomizing: 'true' | 'false';
   showRSS: 'true' | 'false';
   openArticleLinksInNewWindow: 'true' | 'false';
+  showExpirationReminder?: 'true' | 'false';
+  showEditButton?: 'true' | 'false';
 }
 export interface updateUserDto {
   username: string;

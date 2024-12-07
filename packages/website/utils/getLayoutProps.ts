@@ -1,6 +1,7 @@
 import { defaultMenu, MenuItem, PublicMetaProp } from "../api/getAllData";
 import dayjs from "dayjs";
 import { AuthorCardProps } from "../components/AuthorCard";
+import { checkLogin } from "./auth";
 export interface LayoutProps {
   description: string;
   ipcNumber: string;
@@ -31,11 +32,20 @@ export interface LayoutProps {
   showDonateButton: "true" | "false";
   showCopyRight: "true" | "false";
   showRSS: "true" | "false";
+  showExpirationReminder: "true" | "false";
   openArticleLinksInNewWindow: "true" | "false";
+  showEditButton: "true" | "false";
   subMenuOffset: number;
   customCss?: string;
   customScript?: string;
   customHtml?: string;
+  customHead?: HeadTag[];
+}
+
+export interface HeadTag {
+  name: string;
+  props: Record<string, string>;
+  content: string;
 }
 
 export function getLayoutProps(data: PublicMetaProp): LayoutProps {
@@ -64,6 +74,9 @@ export function getLayoutProps(data: PublicMetaProp): LayoutProps {
   if (data?.layout?.html) {
     customSetting.customHtml = data?.layout?.html;
   }
+  if (data?.layout?.head) {
+    customSetting.customHead = data?.layout?.head;
+  }
   if (data?.layout?.script) {
     customSetting.customScript = data?.layout?.script;
   }
@@ -78,6 +91,20 @@ export function getLayoutProps(data: PublicMetaProp): LayoutProps {
   let showRSS: "true" | "false" = "true";
   if (data.meta.siteInfo?.showRSS && data.meta.siteInfo?.showRSS == "false") {
     showRSS = "false";
+  }
+  let showExpirationReminder: "true" | "false" = "true";
+  if (
+    data.meta.siteInfo?.showExpirationReminder &&
+    data.meta.siteInfo?.showExpirationReminder == "false"
+  ) {
+    showExpirationReminder = "false";
+  }
+  let showEditButton: "true" | "false" = "true";
+  if (
+    data.meta.siteInfo?.showEditButton &&
+    data.meta.siteInfo?.showEditButton == "false"
+  ) {
+    showEditButton = "false";
   }
   let openArticleLinksInNewWindow: "true" | "false" = "false";
   if (
@@ -107,6 +134,7 @@ export function getLayoutProps(data: PublicMetaProp): LayoutProps {
     baiduAnalysisID: siteInfo?.baiduAnalysisId || "",
     gaAnalysisID: siteInfo?.gaAnalysisId || "",
     logoDark: siteInfo?.siteLogoDark || "",
+    showExpirationReminder: showExpirationReminder,
     description: siteInfo?.siteDesc || "",
     menus: data?.menus || defaultMenu,
     categories: data.meta.categories,
@@ -117,6 +145,7 @@ export function getLayoutProps(data: PublicMetaProp): LayoutProps {
     showCopyRight,
     showDonateButton,
     showRSS,
+    showEditButton,
     ...customSetting,
   };
 }

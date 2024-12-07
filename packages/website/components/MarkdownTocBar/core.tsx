@@ -1,10 +1,20 @@
 import { useEffect, useState } from "react";
 import throttle from "lodash/throttle";
-import { NavItem } from "./tools";
+import { getEl, NavItem } from "./tools";
 import { scrollTo } from "../../utils/scroll";
-export default function (props: { items: NavItem[]; headingOffset: number }) {
+export default function (props: {
+  items: NavItem[];
+  headingOffset: number;
+  mobile?: boolean;
+}) {
   const { items } = props;
   const [currIndex, setCurrIndex] = useState(-1);
+
+  const updateHash = (hash: string) => {
+    if (hash) {
+      window.history.replaceState(null, "", `#${hash}`);
+    }
+  }
   const handleScroll = throttle((ev: Event) => {
     ev.stopPropagation();
     ev.preventDefault();
@@ -13,7 +23,7 @@ export default function (props: { items: NavItem[]; headingOffset: number }) {
     let topEl: any = null;
     let lastMin = 9999999999;
     for (const each of items) {
-      const el: any = document.querySelector(`[data-id="${each.text}"]`);
+      const el: any = getEl(each, items);
 
       if (!topEl) {
         top = each;
@@ -34,11 +44,19 @@ export default function (props: { items: NavItem[]; headingOffset: number }) {
       }
     }
     setCurrIndex(top.index);
-
-    // updateHash(top.text);
+    updateHash(top.text);
   }, 100);
+
+  
   useEffect(() => {
-    const el = document.querySelector(".markdown-navigation div.active");
+    updateTocScrollbar();
+  }, [currIndex, props.headingOffset]);
+
+  const updateTocScrollbar = () => {
+    const el = document.querySelector(
+      "#toc-container > div > div.markdown-navigation > div.active"
+    ) as HTMLElement;
+
     const container = document.querySelector("#toc-container");
     if (el && container) {
       let to = (el as any)?.offsetTop;
@@ -52,14 +70,16 @@ export default function (props: { items: NavItem[]; headingOffset: number }) {
         behavior: "smooth",
       });
     }
-  }, [currIndex, props.headingOffset]);
+    // console.log(el?.offsetTop);
+  };
+
   //TODO 逻辑完善的 hash 更新
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  });
+  }, []);
   const res = [];
   for (const each of items) {
     const cls = `title-anchor title-level${each.level} ${
@@ -70,7 +90,7 @@ export default function (props: { items: NavItem[]; headingOffset: number }) {
         key={each.index}
         className={cls}
         onClick={() => {
-          const el: any = document.querySelector(`[data-id="${each.text}"]`);
+          const el: any = getEl(each, items);
 
           if (el) {
             let to = el.offsetTop - props.headingOffset;
@@ -78,6 +98,7 @@ export default function (props: { items: NavItem[]; headingOffset: number }) {
               to = 0;
             }
             scrollTo(window, { top: to, easing: "ease-in-out", duration: 800 });
+
           }
         }}
       >
@@ -85,17 +106,39 @@ export default function (props: { items: NavItem[]; headingOffset: number }) {
       </div>
     );
   }
+
   return (
     <>
-      <div
-        className="text-center text-lg font-medium mt-4 text-gray-700 dark:text-dark cursor-pointer"
-        onClick={() => {
-          scrollTo(window, { top: 0, easing: "ease-in-out", duration: 800 });
-        }}
-      >
-        目录
+      <div className="relative" style={{ position: "relative" }}>
+        {props.mobile ? (
+          <>
+            <h2
+              style={{ fontWeight: 600, fontSize: "1.5em", marginBottom: 4 }}
+              className="text-gray-700 dark:text-dark "
+            >
+              目录
+            </h2>
+          </>
+        ) : (
+          <div
+            className="text-center text-lg font-medium mt-4 text-gray-700 dark:text-dark cursor-pointer"
+            onClick={() => {
+              scrollTo(window, {
+                top: 0,
+                easing: "ease-in-out",
+                duration: 800,
+              });
+            }}
+          >
+            目录
+          </div>
+        )}
+
+        <div className="markdown-navigation" style={{ position: "relative" }}>
+          {res}
+        </div>
+        <div style={{ marginBottom: 10, marginTop: -2 }} />
       </div>
-      <div className="markdown-navigation">{res}</div>
     </>
   );
 }

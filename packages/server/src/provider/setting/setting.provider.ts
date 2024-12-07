@@ -3,18 +3,21 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
   HttpsSetting,
+  ISRSetting,
   LayoutSetting,
   LoginSetting,
   MenuSetting,
   StaticSetting,
   VersionSetting,
   WalineSetting,
+  defaultStaticSetting,
 } from 'src/types/setting.dto';
 import { SettingDocument } from 'src/scheme/setting.schema';
 import { PicgoProvider } from '../static/picgo.provider';
 import { encode } from 'js-base64';
 import { defaultMenu, MenuItem } from 'src/types/menu.dto';
 import { MetaProvider } from '../meta/meta.provider';
+import { parseHtmlToHeadTagArr } from 'src/utils/htmlParser';
 @Injectable()
 export class SettingProvider {
   logger = new Logger(SettingProvider.name);
@@ -24,12 +27,19 @@ export class SettingProvider {
     private readonly picgoProvider: PicgoProvider,
     private readonly metaProvider: MetaProvider,
   ) {}
-  async getStaticSetting(): Promise<any> {
-    const res = await this.settingModel.findOne({ type: 'static' }).exec();
+  async getStaticSetting(): Promise<Partial<StaticSetting>> {
+    const res = (await this.settingModel.findOne({ type: 'static' }).exec()) as {
+      value: StaticSetting;
+    };
     if (res) {
-      return res?.value || { storageType: 'local', picgoConfig: null };
+      return res?.value || defaultStaticSetting;
+    } else {
+      await this.settingModel.create({
+        type: 'static',
+        value: defaultStaticSetting,
+      });
+      return defaultStaticSetting;
     }
-    return null;
   }
   async getVersionSetting(): Promise<any> {
     const res = await this.settingModel.findOne({ type: 'version' }).exec();
@@ -37,6 +47,34 @@ export class SettingProvider {
       return res?.value;
     }
     return null;
+  }
+  async getISRSetting(): Promise<any> {
+    const res = await this.settingModel.findOne({ type: 'isr' }).exec();
+    if (res) {
+      return res?.value;
+    } else {
+      await this.settingModel.create({
+        type: 'isr',
+        value: {
+          mode: 'onDemand',
+        },
+      });
+      return {
+        mode: 'onDemand',
+      };
+    }
+  }
+  async updateISRSetting(dto: ISRSetting) {
+    const oldValue = await this.getISRSetting();
+    const newValue = { ...oldValue, ...dto };
+    if (!oldValue) {
+      return await this.settingModel.create({
+        type: 'isr',
+        value: newValue,
+      });
+    }
+    const res = await this.settingModel.updateOne({ type: 'isr' }, { value: newValue });
+    return res;
   }
   async getMenuSetting(): Promise<any> {
     const res = await this.settingModel.findOne({ type: 'menu' }).exec();
@@ -54,10 +92,7 @@ export class SettingProvider {
         value: newValue,
       });
     }
-    const res = await this.settingModel.updateOne(
-      { type: 'menu' },
-      { value: newValue },
-    );
+    const res = await this.settingModel.updateOne({ type: 'menu' }, { value: newValue });
     return res;
   }
   async importSetting(setting: any) {
@@ -104,7 +139,11 @@ export class SettingProvider {
     }
     const res: any = {};
     for (const key of Object.keys(dto)) {
-      res[key] = encode(dto[key]);
+      if (key == 'head') {
+        res[key] = parseHtmlToHeadTagArr(dto[key]);
+      } else {
+        res[key] = encode(dto[key]);
+      }
     }
     return res;
   }
@@ -130,10 +169,7 @@ export class SettingProvider {
         value: newValue,
       });
     }
-    const res = await this.settingModel.updateOne(
-      { type: 'login' },
-      { value: newValue },
-    );
+    const res = await this.settingModel.updateOne({ type: 'login' }, { value: newValue });
     return res;
   }
   async updateVersionSetting(dto: VersionSetting) {
@@ -145,10 +181,7 @@ export class SettingProvider {
         value: newValue,
       });
     }
-    const res = await this.settingModel.updateOne(
-      { type: 'version' },
-      { value: newValue },
-    );
+    const res = await this.settingModel.updateOne({ type: 'version' }, { value: newValue });
     return res;
   }
 
@@ -161,10 +194,7 @@ export class SettingProvider {
         value: newValue,
       });
     }
-    const res = await this.settingModel.updateOne(
-      { type: 'waline' },
-      { value: newValue },
-    );
+    const res = await this.settingModel.updateOne({ type: 'waline' }, { value: newValue });
     return res;
   }
   async updateLayoutSetting(dto: LayoutSetting) {
@@ -176,10 +206,7 @@ export class SettingProvider {
         value: newValue,
       });
     }
-    const res = await this.settingModel.updateOne(
-      { type: 'layout' },
-      { value: newValue },
-    );
+    const res = await this.settingModel.updateOne({ type: 'layout' }, { value: newValue });
     return res;
   }
   async updateHttpsSetting(dto: HttpsSetting) {
@@ -191,13 +218,10 @@ export class SettingProvider {
         value: newValue,
       });
     }
-    const res = await this.settingModel.updateOne(
-      { type: 'https' },
-      { value: newValue },
-    );
+    const res = await this.settingModel.updateOne({ type: 'https' }, { value: newValue });
     return res;
   }
-  async updateStaticSetting(dto: StaticSetting) {
+  async updateStaticSetting(dto: Partial<StaticSetting>) {
     const oldValue = await this.getStaticSetting();
     const newValue = { ...oldValue, ...dto };
     if (!oldValue) {
@@ -206,10 +230,7 @@ export class SettingProvider {
         value: newValue,
       });
     }
-    const res = await this.settingModel.updateOne(
-      { type: 'static' },
-      { value: newValue },
-    );
+    const res = await this.settingModel.updateOne({ type: 'static' }, { value: newValue });
 
     await this.picgoProvider.initDriver();
     return res;

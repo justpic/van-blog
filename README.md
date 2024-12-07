@@ -2,7 +2,7 @@
 	<img src="/img/logo.svg" style="width: 200px"></img>
 </p>
 <p align="center">
-	<strong>VanBlog 是一款简洁实用优雅的高性能个人博客系统。支持 HTTPS 证书全自动按需申请、黑暗模式、移动端自适应和评论，内置流量统计与图床，内嵌评论系统，配有完备的、支持黑暗模式、支持移动端、支持一键上传剪切板图片到图床、带有强大的编辑器的后台管理面板。</strong>
+	<strong>VanBlog是一款简洁、实用、优雅的个人博客系统，支持全自动按需申请HTTPS证书、黑暗模式、移动端自适应和评论功能。它内置了流量统计和图床，并集成了评论系统。此外，VanBlog还具有无限的可扩展性，提供完备的后台管理面板，支持黑暗模式、移动端、一键上传剪贴板图片到图床，并带有强大的编辑器。</strong>
 </p>
 <p align="center">
   <img src="https://img.shields.io/github/v/release/mereithhh/van-blog?display_name=tag" />
@@ -31,19 +31,21 @@
 - [x] 前台和后台都为响应式设计，完美适配移动端和多尺寸设备。
 - [x] 前台和后台都支持黑暗模式，并可自动切换。
 - [x] 前台为静态网页（SSG），并支持秒级的增量渲染，每次改动无需重新构建全部页面。
-- [x] SEO 和无障碍友好。
+- [x] SEO 和无障碍友好，支持自定义文章路径。
 - [x] 静态网页，CDN 友好。
 - [x] 版本号展示和更新提醒。
 - [x] 基于 React，项目工程化，二次开发友好。
 - [x] 内置强大的分析功能，可统计访客等数据。并配有精美看板。
 - [x] 内嵌评论系统。
-- [x] 强大的 markdown 编辑器，支持图表和数学公式，一键插入 more 标记，一键剪切板及本地图片上传，支持自定义高亮块语法，支持 Emoji 表情选取。
+- [x] 强大的 Markdown 编辑器，支持图表和数学公式，一键插入 more 标记，一键剪切板及本地图片上传，支持自定义高亮块语法，支持 Emoji 表情选取。
 - [x] TOC、草稿、代码复制、访客数、评论数、分类、标签、搜索、加密、友链、打赏、自定义导航栏。
 - [x] 多个布局设置，可自定义页面细节。
-- [x] 高度客制化，可添加自定义 CSS、HTML 和 JS 代码。
+- [x] 高度定制化，可添加自定义 CSS、HTML 和 JS 代码。
 - [x] 支持自定义页面。
 - [x] 可添加具有指定权限的协作者。
-- [x] 内置图床，并支持各种 OSS 图床、github 图床（外部图床基于 picgo）等。
+- [x] 内置图床，并支持各种 OSS 图床、github 图床（外部图床基于 picgo）等
+- [x] 支持上传图片自动添加水印，无论何种图床
+- [x] 支持上传图片自动压缩，无论何种图床
 - [x] 极致轻量化，没有花里胡哨。页面秒切换、图片懒加载。
 - [x] 脚本一键部署，多种部署方式，支持 ARM 平台。
 - [x] 支持 GA、百度分析
@@ -68,39 +70,43 @@ curl -L https://vanblog.mereith.com/vanblog.sh -o vanblog.sh && chmod +x vanblog
 
 ### 其他部署方式
 
-具体请移步项目文档：[快速上手](https://vanblog.mereith.com/guide/docker.html)
+具体请移步项目文档：[快速上手](https://vanblog.mereith.com/guide/get-started.html)
 
 ## 反代
 
-请参考： [反代](https://vanblog.mereith.com/guide/nginx.html)
+请参考： [反代](https://vanblog.mereith.com/reference/reverse-proxy.html)
 
 ## 常见问题
 
-> [作者 logo 无法加载](https://vanblog.mereith.com/ref/faq.html#%E5%9B%BE%E7%89%87-%E4%BD%9C%E8%80%85-logo-%E5%8A%A0%E8%BD%BD%E4%B8%8D%E5%87%BA%E6%9D%A5)
+> [备份与迁移](https://vanblog.mereith.com/guide/backup.html)
 >
-> [http error](https://vanblog.mereith.com/ref/faq.html#%E9%83%A8%E7%BD%B2%E5%90%8E-http-error)
+> [作者 logo 无法加载](https://vanblog.mereith.com/faq/usage.html#图片-作者-logo-加载不出来)
 >
-> [docker 镜像拉取慢](https://vanblog.mereith.com/ref/faq.html#docker-%E9%95%9C%E5%83%8F%E6%8B%89%E5%8F%96%E6%85%A2)
+> [http error](https://vanblog.mereith.com/faq/deploy.html#部署后-http-error)
 >
-> [如何外部访问数据库](https://vanblog.mereith.com/ref/faq.html#%E5%A6%82%E4%BD%95%E5%9C%A8%E5%A4%96%E9%83%A8%E8%AE%BF%E9%97%AE%E6%95%B0%E6%8D%AE%E5%BA%93)
+> [docker 镜像拉取慢](https://vanblog.mereith.com/faq/deploy.html#docker-镜像拉取慢)
 >
-> [如何回滚](https://vanblog.mereith.com/ref/faq.html#%E5%A6%82%E4%BD%95%E5%9B%9E%E6%BB%9A)
+> [如何外部访问数据库](https://vanblog.mereith.com/faq/deploy.html#如何在外部访问数据库)
+>
+> [如何回滚](https://vanblog.mereith.com/faq/update.html#如何回滚)
 >
 > [如何升级](https://vanblog.mereith.com/guide/update.html)
 >
-> [更新后后台报错||一直加载中](https://vanblog.mereith.com/guide/update.html#%E6%9B%B4%E6%96%B0%E5%90%8E%E5%90%8E%E5%8F%B0%E6%8A%A5%E9%94%99-%E4%B8%80%E7%9B%B4%E5%8A%A0%E8%BD%BD%E4%B8%AD)
+> [更新后后台报错||一直加载中](https://vanblog.mereith.com/faq/update.html#升级后后台报错或持续加载)
 >
-> [更多常见问题](https://vanblog.mereith.com/ref/faq.html)
+> [开启了 https 重定向后关不掉](https://vanblog.mereith.com/faq/usage.html#开启了-https-重定向后关不掉)
+>
+> [更多常见问题](https://vanblog.mereith.com/faq/)
 
 ## 关于更新
 
-此项目会持续更新的，如果没有恶行 bug（有的话看到了会紧急修复），一般每周发一次新版本。
+此项目会持续更新的，如果没有恶性 bug（有的话看到了会紧急修复），一般每周发一次新版本。
 
 如果遇到了问题，可以先更新试试看。
 
 ## 交流群
 
-- [VanBlog  交流群](https://jq.qq.com/?_wv=1027&k=5NRyK2Sw)
+- [VanBlog 交流群](https://jq.qq.com/?_wv=1027&k=5NRyK2Sw)
 
 ## 说明与文档
 
@@ -112,7 +118,7 @@ curl -L https://vanblog.mereith.com/vanblog.sh -o vanblog.sh && chmod +x vanblog
 
 ## 开发指南
 
-- [开发指南](https://vanblog.mereith.com/ref/dev.html)
+- [开发指南](https://vanblog.mereith.com/contribution.html)
 
 ## 谁在使用
 
@@ -121,11 +127,32 @@ curl -L https://vanblog.mereith.com/vanblog.sh -o vanblog.sh && chmod +x vanblog
 如果您想把自己加进来，请提一个 [issue](https://github.com/Mereithhh/van-blog/issues/new/choose)，我会尽快添加的。
 
 - [Mereith's Blog](https://www.mereith.com)
-- [前端｜面试进阶之道](https://www.whyknown.com/)
-- [小柴の BLOG](https://blog.sepbf.com)
 - [handy 的小窝](https://www.handyzyg.cn)
 - [GT 的官方博客](https://gt-it.net)
 - [無糧不聚兵‘s Blog](https://www.wongcw.cn)
+- [oldmoon](https://oldmoon.top)
+- [seek.wiki](https://seek.wiki)
+- [joker's blog](https://jingjianqian.top)
+- [SnailBlog](https://blog.mldd521.com)
+- [谷粒 corn.li](https://corn.li)
+- [BARM Blog](https://blog.ccz.life)
+- [凌览社](http://www.linglan01.cn)
+- [Peter's blog](https://niuery.com)
+- [我本无罪的博客](https://blog.rnaan.com/)
+- [还是夸张一点](https://blog.ynsites.com/)
+- [青菜的杂货铺](https://211222.xyz)
+- [花菜的博客](https://blog.huacai.one)
+- [智芯物联的空间](https://www.tingshuo.online)
+- [郭郭的博客](https://blog.warmplace.cn)
+- [Done](https://www.dong-blog.fun/)
+- [SpaceX](https://tech.twjblog.top/)
+- [没想好的个人博客](https://blog.shizhuoran.top/)
+- [春天运维之旅](https://blog.tenchuntian.cn/)
+- [编程小客栈](http://mystyouth.com/)
+- [Newhand](https://newhand.top/)
+- [Jerome's Blog](https://www.blog-jerome.top/)
+- [宁骑播客](https://blog.xintianyuehui.cn/)
+<!-- - [耿老师](https://transfer.teachergeng.space) -->
 
 ## TODO
 
@@ -154,9 +181,16 @@ curl -L https://vanblog.mereith.com/vanblog.sh -o vanblog.sh && chmod +x vanblog
 - [x] Token 管理
 - [x] picgo 插件安装
 - [x] 忘记密码
+- [x] 分类加密
+- [x] 自定义文字路径
+- [x] 系统日志查看
 - [ ] 快捷分享按钮
-- [ ] 完善可自定义上传文件的自定义页面功能（现在的自定义页面有潜在的 css 污染问题）
-- [ ] 增加在特定事件后触发执行自定义代码或 webhook 的扩展能力
+- [x] 完善可自定义上传文件的自定义页面功能（现在的自定义页面有潜在的 css 污染问题）
+- [x] 图片上传自动添加水印
+- [x] 迁移到 pnpm，使用 workspace
+- [x] 增加在特定事件后触发执行自定义代码或 webhook 的扩展能力
+- [x] 上传图片自动压缩功能
+- [x] 批量操作文章草稿
 - [ ] 插件系统
 - [ ] 自定义主题（前端渲染器）系统
 - [ ] 浏览器消息通知
@@ -177,8 +211,8 @@ curl -L https://vanblog.mereith.com/vanblog.sh -o vanblog.sh && chmod +x vanblog
 打赏时您可以备注名称，我会将您添加至打赏列表中。
 
 <p align="center">
-  <img  alt="打赏-微信" src="/img/wechat.jpg"  style="width: 200px;margin-right: 4px;" />
-  <img  alt="打赏-支付宝" src="/img/ali-pay.jpg"  style="width: 200px" />
+  <img alt="打赏-微信" src="/img/wechat.jpg" style="width: 200px;margin-right: 4px;" />
+  <img alt="打赏-支付宝" src="/img/ali-pay.jpg" style="width: 200px" />
 </p>
 
 ## 捐赠信息
@@ -205,3 +239,6 @@ PS：如果打赏时请备注捐赠者，如有遗漏请联系我添加（有时
 <p align="center"> 
   <img src="/img/lighthouse.png" style="width: 400px"></img>
 </p>
+
+## 多说一句
+> 很抱歉有段时间断更了，陆陆续续会慢慢继续更新的。  2024-09-01

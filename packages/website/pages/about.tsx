@@ -53,6 +53,10 @@ const AboutPage = (props: AboutPageProps) => {
       sideBar={<AuthorCard option={props.authorCardProps} />}
     >
       <PostCard
+        setContent={() => {}}
+        showExpirationReminder={
+          props.layoutProps.showExpirationReminder == "true"
+        }
         openArticleLinksInNewWindow={false}
         id={0}
         key={"about"}
@@ -67,8 +71,10 @@ const AboutPage = (props: AboutPageProps) => {
         type={"about"}
         enableComment={props.layoutProps.enableComment}
         top={0}
+        customCopyRight={null}
         showDonateInAbout={props.showDonateInAbout == "true"}
         copyrightAggreement={props.layoutProps.copyrightAggreement}
+        showEditButton={props.layoutProps.showEditButton === "true"}
       ></PostCard>
     </Layout>
   );

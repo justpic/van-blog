@@ -12,6 +12,8 @@ export class CreateArticleDto {
   updatedAt?: Date;
   createdAt?: Date;
   author?: string;
+  copyright?: string;
+  pathname?: string;
 }
 export class UpdateArticleDto {
   title?: string;
@@ -27,6 +29,8 @@ export class UpdateArticleDto {
   visited?: number;
   updatedAt?: Date;
   author?: string;
+  copyright?: string;
+  pathname?: string;
 }
 export class SearchArticleOption {
   page: number;

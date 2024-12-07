@@ -11,24 +11,24 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import {
-  CreateDraftDto,
-  PublishDraftDto,
-  UpdateDraftDto,
-} from 'src/types/draft.dto';
+import { CreateDraftDto, PublishDraftDto, UpdateDraftDto } from 'src/types/draft.dto';
 import { SortOrder } from 'src/types/sort';
 import { AdminGuard } from 'src/provider/auth/auth.guard';
 import { DraftProvider } from 'src/provider/draft/draft.provider';
 import { ISRProvider } from 'src/provider/isr/isr.provider';
 import { config } from 'src/config';
+import { PipelineProvider } from 'src/provider/pipeline/pipeline.provider';
+import { ApiToken } from 'src/provider/swagger/token';
 
 @ApiTags('draft')
 @UseGuards(...AdminGuard)
+@ApiToken
 @Controller('/api/admin/draft')
 export class DraftController {
   constructor(
     private readonly draftProvider: DraftProvider,
     private readonly isrProvider: ISRProvider,
+    private readonly pipelineProvider: PipelineProvider,
   ) {}
 
   @Get('/')
@@ -72,7 +72,17 @@ export class DraftController {
 
   @Put('/:id')
   async update(@Param('id') id: number, @Body() updateDto: UpdateDraftDto) {
+    const result = await this.pipelineProvider.dispatchEvent('beforeUpdateDraft', updateDto);
+    if (result.length > 0) {
+      const lastResult = result[result.length - 1];
+      const lastOuput = lastResult.output;
+      if (lastOuput) {
+        updateDto = lastOuput;
+      }
+    }
     const data = await this.draftProvider.updateById(id, updateDto);
+    const updated = await this.draftProvider.findById(id);
+    this.pipelineProvider.dispatchEvent('afterUpdateDraft', updated);
     return {
       statusCode: 200,
       data,
@@ -85,7 +95,16 @@ export class DraftController {
     if (!createDto.author) {
       createDto.author = author;
     }
+    const result = await this.pipelineProvider.dispatchEvent('beforeUpdateDraft', createDto);
+    if (result.length > 0) {
+      const lastResult = result[result.length - 1];
+      const lastOuput = lastResult.output;
+      if (lastOuput) {
+        createDto = lastOuput;
+      }
+    }
     const data = await this.draftProvider.create(createDto);
+    this.pipelineProvider.dispatchEvent('afterUpdateDraft', data);
     return {
       statusCode: 200,
       data,
@@ -99,8 +118,17 @@ export class DraftController {
         message: '演示站禁止发布草稿！',
       };
     }
+    const result = await this.pipelineProvider.dispatchEvent('beforeUpdateArticle', publishDto);
+    if (result.length > 0) {
+      const lastResult = result[result.length - 1];
+      const lastOuput = lastResult.output;
+      if (lastOuput) {
+        publishDto = lastOuput;
+      }
+    }
     const data = await this.draftProvider.publish(id, publishDto);
     this.isrProvider.activeAll('发布草稿触发增量渲染！');
+    this.pipelineProvider.dispatchEvent('afterUpdateArticle', data);
     return {
       statusCode: 200,
       data,
@@ -108,7 +136,9 @@ export class DraftController {
   }
   @Delete('/:id')
   async delete(@Param('id') id: number) {
+    const toDeleteDraft = await this.draftProvider.findById(id);
     const data = await this.draftProvider.deleteById(id);
+    this.pipelineProvider.dispatchEvent('deleteDraft', toDeleteDraft);
     return {
       statusCode: 200,
       data,

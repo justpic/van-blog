@@ -1,5 +1,4 @@
 import { useContext, useMemo, useState } from "react";
-import ImageBoxFuture from "../ImageBoxFuture";
 import { ThemeContext } from "../../utils/themeContext";
 
 export default function (props: {
@@ -8,7 +7,7 @@ export default function (props: {
   aliPayDark: string;
   weChatPayDark: string;
   author: string;
-  id: number;
+  id: number | string;
 }) {
   const [show, setShow] = useState(false);
   const { theme } = useContext(ThemeContext);
@@ -51,21 +50,9 @@ export default function (props: {
             }}
           >
             <div className="flex justify-center">
-              <ImageBoxFuture
-                alt="logo ali pay"
-                src={payUrl[0]}
-                width={180}
-                height={250}
-                className={undefined}
-              ></ImageBoxFuture>
+              <img alt="ali pay" src={payUrl[0]} width={180} height={250} />
               <div className="w-4 inline-block"></div>
-              <ImageBoxFuture
-                alt="logo wechat pay"
-                className={undefined}
-                src={payUrl[1]}
-                width={180}
-                height={250}
-              ></ImageBoxFuture>
+              <img alt="wechat pay" src={payUrl[1]} width={180} height={250} />
             </div>
           </div>
         </>

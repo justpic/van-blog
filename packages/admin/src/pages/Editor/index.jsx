@@ -3,6 +3,7 @@ import EditorProfileModal from '@/components/EditorProfileModal';
 import PublishDraftModal from '@/components/PublishDraftModal';
 import Tags from '@/components/Tags';
 import UpdateModal from '@/components/UpdateModal';
+import { SaveTip } from '@/components/SaveTip';
 import {
   deleteArticle,
   deleteDraft,
@@ -13,6 +14,7 @@ import {
   updateArticle,
   updateDraft,
 } from '@/services/van-blog/api';
+import { getPathname } from '@/services/van-blog/getPathname';
 import { parseMarkdownFile, parseObjToMarkdown } from '@/services/van-blog/parseMarkdownFile';
 import { useCacheState } from '@/services/van-blog/useCacheState';
 import { DownOutlined } from '@ant-design/icons';
@@ -20,16 +22,18 @@ import { PageContainer } from '@ant-design/pro-layout';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Tag, Upload } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { history } from 'umi';
+import moment from 'moment';
 
 export default function () {
   const [value, setValue] = useState('');
   const [currObj, setCurrObj] = useState({});
   const [loading, setLoading] = useState(true);
-  const [editorConfig, setEditorConfig] = useCacheState({ afterSave: 'stay' }, 'editorConfig');
+  const [editorConfig, setEditorConfig] = useCacheState(
+    { afterSave: 'stay', useLocalCache: 'close' },
+    'editorConfig',
+  );
   const type = history.location.query?.type || 'article';
-  const key = useMemo(() => {
-    return `${type}-${history.location.query?.id || '0'}`;
-  }, [type]);
+  const getCacheKey = () => `${type}-${history.location.query?.id || '0'}`;
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown);
@@ -38,7 +42,14 @@ export default function () {
     };
   }, [currObj, value, type]);
   const onKeyDown = (ev) => {
+    let save = false;
+    if (ev.metaKey == true && ev.key.toLocaleLowerCase() == 's') {
+      save = true;
+    }
     if (ev.ctrlKey == true && ev.key.toLocaleLowerCase() == 's') {
+      save = true;
+    }
+    if (save) {
       event?.preventDefault();
       ev?.preventDefault();
       handleSave();
@@ -57,10 +68,48 @@ export default function () {
 
       const type = history.location.query?.type || 'article';
       const id = history.location.query?.id;
-      const cache = window.localStorage.getItem(key);
+      const cacheString = window.localStorage.getItem(getCacheKey());
+      let cacheObj = {};
+      try {
+        cacheObj = JSON.parse(cacheString || '{}');
+      } catch (err) {
+        window.localStorage.removeItem(getCacheKey());
+      }
+      const checkCache = (data) => {
+        const clear = () => {
+          window.localStorage.removeItem(getCacheKey());
+        };
+        if (editorConfig?.useLocalCache == 'close') {
+          clear();
+          return false;
+        }
+        if (!cacheObj || !cacheObj?.content) {
+          clear();
+          return false;
+        }
+        if (cacheObj?.content == data?.content) {
+          clear();
+          return false;
+        }
+        const updatedAt = data?.updatedAt;
+        if (!updatedAt) {
+          clear();
+          return false;
+        }
+        const cacheTime = cacheObj?.time;
+        if (moment(updatedAt).isAfter(cacheTime)) {
+          clear();
+          return false;
+        } else {
+          console.log('[缓存检查] 本地缓存时间晚于服务器更新时间，使用缓存');
+          return cacheObj?.content;
+        }
+      };
+
       if (type == 'about') {
         const { data } = await getAbout();
-        if (cache && cache != data?.content) {
+        const cache = checkCache(data);
+        if (cache) {
           if (!noMessage) {
             message.success('从缓存中恢复状态！');
           }
@@ -73,7 +122,8 @@ export default function () {
       }
       if (type == 'article' && id) {
         const { data } = await getArticleById(id);
-        if (cache && cache !== data?.content) {
+        const cache = checkCache(data);
+        if (cache) {
           setValue(cache);
           if (!noMessage) {
             message.success('从缓存中恢复状态！');
@@ -86,7 +136,8 @@ export default function () {
       }
       if (type == 'draft' && id) {
         const { data } = await getDraftById(id);
-        if (cache && cache != data?.content) {
+        const cache = checkCache(data);
+        if (cache) {
           if (!noMessage) {
             message.success('从缓存中恢复状态！');
           }
@@ -99,7 +150,7 @@ export default function () {
       }
       setLoading(false);
     },
-    [history, setLoading, setValue, key],
+    [history, setLoading, setValue, type],
   );
 
   useEffect(() => {
@@ -294,7 +345,7 @@ export default function () {
                         </div>
                       ),
                       onOk: () => {
-                        window.open(`/post/${currObj.id}`, '_blank');
+                        window.open(`/post/${getPathname(currObj)}`, '_blank');
                         return true;
                       },
                       okText: '仍然访问',
@@ -302,7 +353,7 @@ export default function () {
                     });
                     return;
                   }
-                  url = `/post/${currObj?.id}`;
+                  url = `/post/${getPathname(currObj)}`;
                 } else {
                   url = '/about';
                 }
@@ -359,7 +410,7 @@ export default function () {
               okText: '确认清理',
               cancelText: '返回',
               onOk: () => {
-                window.localStorage.removeItem(key);
+                window.localStorage.removeItem(getCacheKey());
                 setValue(currObj?.content || '');
                 message.success('清除实时保存缓存成功！已重置为服务端返回数据');
               },
@@ -397,7 +448,7 @@ export default function () {
         ),
         extra: [
           <Button key="extraSaveBtn" type="primary" onClick={handleSave}>
-            保存
+            {<SaveTip />}
           </Button>,
           <Button
             key="backBtn"
@@ -438,7 +489,15 @@ export default function () {
           value={value}
           onChange={(val) => {
             setValue(val);
-            window.localStorage.setItem(key, val);
+            if (editorConfig?.useLocalCache && editorConfig?.useLocalCache == 'open') {
+              window.localStorage.setItem(
+                getCacheKey(),
+                JSON.stringify({
+                  content: val,
+                  time: new Date().valueOf(),
+                }),
+              );
+            }
           }}
         />
       </div>

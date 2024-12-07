@@ -11,12 +11,17 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    // "rootDir": "./src",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "composite": true,
+    "paths": {
+      "mongoose": ["./node_modules/mongoose"]
+    }
   }
 }

@@ -1,14 +1,15 @@
-import Link from "../Link";
+import Link from "next/link";
 import { useMemo } from "react";
 import { encodeQuerystring } from "../../utils/encode";
 import { getTarget } from "../Link/tools";
+import { getArticlePath } from "../../utils/getArticlePath";
 
 export function PostBottom(props: {
   type: "overview" | "article" | "about";
   lock: boolean;
   tags?: string[];
-  next?: { id: number; title: string };
-  pre?: { id: number; title: string };
+  next?: { id: number; title: string; pathname?: string };
+  pre?: { id: number; title: string; pathname?: string };
   openArticleLinksInNewWindow: boolean;
 }) {
   const show = useMemo(() => {
@@ -25,13 +26,9 @@ export function PostBottom(props: {
             <div key={`article-tag-${tag}`}>
               <Link
                 href={`/tag/${encodeQuerystring(tag)}`}
-                newTab={props.openArticleLinksInNewWindow}
+                target={getTarget(props.openArticleLinksInNewWindow)}
               >
-                <a
-                  target={getTarget(props.openArticleLinksInNewWindow)}
-                  href={`/tag/${encodeQuerystring(tag)}`}
-                  className=" border-b border-white hover:border-gray-500 dark:border-dark dark:hover:border-gray-300 dark:hover:text-gray-300"
-                >{`${tag}`}</a>
+                <div className=" border-b border-white hover:border-gray-500 dark:border-dark dark:hover:border-gray-300 dark:hover:text-gray-300">{`${tag}`}</div>
               </Link>
             </div>
           ))}
@@ -42,30 +39,26 @@ export function PostBottom(props: {
         <div className="" style={{ maxWidth: "50%" }}>
           {props.pre?.id && (
             <Link
-              href={`/post/${props.pre?.id}`}
-              newTab={props.openArticleLinksInNewWindow}
+              href={`/post/${getArticlePath(props.pre)}`}
+              target={getTarget(props.openArticleLinksInNewWindow)}
             >
-              <a
+              <div
                 style={{ whiteSpace: "break-spaces" }}
-                href={`/post/${props.pre?.id}`}
-                target={getTarget(props.openArticleLinksInNewWindow)}
                 className="dark:text-dark dark:border-dark dark-border-hover border-b pb border-dashed hover:border-gray-800 border-white hover:text-gray-800"
-              >{`< ${props.pre?.title}`}</a>
+              >{`< ${props.pre?.title}`}</div>
             </Link>
           )}
         </div>
         <div className="" style={{ maxWidth: "50%" }}>
           {props.next?.id && (
             <Link
-              href={`/post/${props.next?.id}`}
-              newTab={props.openArticleLinksInNewWindow}
+              href={`/post/${getArticlePath(props.next)}`}
+              target={getTarget(props.openArticleLinksInNewWindow)}
             >
-              <a
+              <div
                 style={{ whiteSpace: "break-spaces" }}
-                href={`/post/${props.next?.id}`}
-                target={getTarget(props.openArticleLinksInNewWindow)}
                 className="dark:text-dark dark:border-dark  dark-border-hover border-b pb border-dashed hover:border-gray-800 border-white hover:text-gray-800"
-              >{`${props.next?.title} >`}</a>
+              >{`${props.next?.title} >`}</div>
             </Link>
           )}
         </div>

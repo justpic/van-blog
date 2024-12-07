@@ -1,18 +1,12 @@
-import {
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { config } from 'src/config';
 import { AdminGuard } from 'src/provider/auth/auth.guard';
 import { ISRProvider } from 'src/provider/isr/isr.provider';
+import { ApiToken } from 'src/provider/swagger/token';
 import { TagProvider } from 'src/provider/tag/tag.provider';
 @ApiTags('tag')
+@ApiToken
 @UseGuards(...AdminGuard)
 @Controller('/api/admin/tag/')
 export class TagController {
@@ -39,10 +33,7 @@ export class TagController {
     };
   }
   @Put('/:name')
-  async updateTagByName(
-    @Param('name') name: string,
-    @Query('value') newName: string,
-  ) {
+  async updateTagByName(@Param('name') name: string, @Query('value') newName: string) {
     if (config.demo && config.demo == 'true') {
       return {
         statusCode: 401,

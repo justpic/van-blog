@@ -35,9 +35,9 @@ export default function (props) {
           washedValues[k.replace('C', '')] = v;
         }
 
-        await createArticle(washedValues);
+        const { data } = await createArticle(washedValues);
         if (onFinish) {
-          onFinish();
+          onFinish(data);
         }
 
         return true;
@@ -62,6 +62,14 @@ export default function (props) {
         name="topC"
         label="置顶优先级"
         placeholder="留空或0表示不置顶，其余数字越大表示优先级越高"
+      />
+      <ProFormText
+        width="md"
+        id="pathnameC"
+        name="pathnameC"
+        label="自定义路径名"
+        tooltip="文章发布后的路径将为 /post/[自定义路径名]，如果未设置则使用文章 id 作为路径名"
+        placeholder="留空或为空则使用 id 作为路径名"
       />
       <ProFormSelect
         mode="tags"
@@ -151,6 +159,14 @@ export default function (props) {
             },
           ];
         }}
+      />
+      <ProFormText
+        width="md"
+        id="copyrightC"
+        name="copyrightC"
+        label="版权声明"
+        tooltip="设置后会替换掉文章页底部默认的版权声明文字，留空则根据系统设置中的相关选项进行展示"
+        placeholder="设置后会替换掉文章底部默认的版权"
       />
     </ModalForm>
   );

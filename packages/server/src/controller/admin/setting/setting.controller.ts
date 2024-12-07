@@ -2,19 +2,16 @@ import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
 
 import { ApiTags } from '@nestjs/swagger';
 import { config } from 'src/config/index';
-import {
-  LayoutSetting,
-  LoginSetting,
-  StaticSetting,
-  WalineSetting,
-} from 'src/types/setting.dto';
+import { LayoutSetting, LoginSetting, StaticSetting, WalineSetting } from 'src/types/setting.dto';
 import { AdminGuard } from 'src/provider/auth/auth.guard';
 import { ISRProvider } from 'src/provider/isr/isr.provider';
 import { SettingProvider } from 'src/provider/setting/setting.provider';
 import { WalineProvider } from 'src/provider/waline/waline.provider';
+import { ApiToken } from 'src/provider/swagger/token';
 
 @ApiTags('setting')
 @UseGuards(...AdminGuard)
+@ApiToken
 @Controller('/api/admin/setting')
 export class SettingController {
   constructor(
@@ -33,7 +30,7 @@ export class SettingController {
   }
 
   @Put('static')
-  async updateStaticSetting(@Body() body: StaticSetting) {
+  async updateStaticSetting(@Body() body: Partial<StaticSetting>) {
     if (config.demo && config.demo == 'true') {
       return {
         statusCode: 401,

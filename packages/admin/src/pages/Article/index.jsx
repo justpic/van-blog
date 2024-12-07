@@ -1,9 +1,10 @@
 import ImportArticleModal from '@/components/ImportArticleModal';
 import NewArticleModal from '@/components/NewArticleModal';
 import { getArticlesByOption } from '@/services/van-blog/api';
+import { batchExport, batchDelete } from '@/services/van-blog/batch';
 import { useNum } from '@/services/van-blog/useNum';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
-import { Button } from 'antd';
+import { Button, Space, message } from 'antd';
 import RcResizeObserver from 'rc-resize-observer';
 import { useMemo, useRef, useState } from 'react';
 import { history } from 'umi';
@@ -49,6 +50,35 @@ export default () => {
           columns={columns}
           actionRef={actionRef}
           cardBordered
+          rowSelection={{
+            fixed: true,
+            preserveSelectedRowKeys: true,
+          }}
+          tableAlertOptionRender={({ selectedRowKeys, onCleanSelected }) => {
+            return (
+              <Space>
+                <a
+                  onClick={async () => {
+                    await batchDelete(selectedRowKeys);
+                    message.success('批量删除成功！');
+                    actionRef.current.reload();
+                    onCleanSelected();
+                  }}
+                >
+                  批量删除
+                </a>
+                <a
+                  onClick={() => {
+                    batchExport(selectedRowKeys);
+                    onCleanSelected();
+                  }}
+                >
+                  批量导出
+                </a>
+                <a onClick={onCleanSelected}>取消选择</a>
+              </Space>
+            );
+          }}
           request={async (params = {}, sort, filter) => {
             const option = {};
             if (sort.createdAt) {
@@ -119,8 +149,8 @@ export default () => {
           }}
           editable={false}
           columnsState={{
-            persistenceKey: 'van-blog-article-table',
-            persistenceType: 'localStorage',
+            // persistenceKey: 'van-blog-article-table',
+            // persistenceType: 'localStorage',
             value: colKeys,
             onChange(value) {
               setColKeys(value);
@@ -155,14 +185,16 @@ export default () => {
             </Button>,
             <NewArticleModal
               key="newArticle123"
-              onFinish={() => {
+              onFinish={(data) => {
                 actionRef?.current?.reload();
+                history.push(`/editor?type=article&id=${data.id}`);
               }}
             />,
             <ImportArticleModal
               key="importArticleBtn"
               onFinish={() => {
                 actionRef?.current?.reload();
+                message.success('导入成功！');
               }}
             />,
           ]}

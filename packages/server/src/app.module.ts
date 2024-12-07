@@ -1,9 +1,4 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -77,10 +72,22 @@ import { TokenProvider } from './provider/token/token.provider';
 import { Token, TokenSchema } from './scheme/token.schema';
 import { TokenGuard } from './provider/auth/token.guard';
 import { WebsiteProvider } from './provider/website/website.provider';
+import { Category, CategorySchema } from './scheme/category.schema';
+import {
+  PublicCustomPageController,
+  PublicOldCustomPageRedirectController,
+} from './controller/customPage/customPage.controller';
+import { Pipeline, PipelineSchema } from './scheme/pipeline.schema';
+import { PipelineProvider } from './provider/pipeline/pipeline.provider';
+import { PipelineController } from './controller/admin/pipeline/pipeline.controller';
+import { TokenController } from './controller/admin/token/token.controller';
+import { initJwt } from './utils/initJwt';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(config.mongoUrl),
+    MongooseModule.forRoot(config.mongoUrl, {
+      autoIndex: true,
+    }),
     MongooseModule.forFeature([
       { name: Article.name, schema: ArticleSchema },
       { name: Draft.name, schema: DraftSchema },
@@ -92,11 +99,17 @@ import { WebsiteProvider } from './provider/website/website.provider';
       { name: Static.name, schema: StaticSchema },
       { name: CustomPage.name, schema: CustomPageSchema },
       { name: Token.name, schema: TokenSchema },
+      { name: Category.name, schema: CategorySchema },
+      { name: Pipeline.name, schema: PipelineSchema },
     ]),
-    JwtModule.register({
-      secret: config.jwtSecret,
-      signOptions: {
-        expiresIn: 3600 * 24 * 7,
+    JwtModule.registerAsync({
+      useFactory: async () => {
+        return {
+          secret: await initJwt(),
+          signOptions: {
+            expiresIn: 3600 * 24 * 7,
+          },
+        };
       },
     }),
     ScheduleModule.forRoot(),
@@ -126,6 +139,10 @@ import { WebsiteProvider } from './provider/website/website.provider';
     CollaboratorController,
     ISRController,
     CustomPageController,
+    PublicCustomPageController,
+    PublicOldCustomPageRedirectController,
+    PipelineController,
+    TokenController,
   ],
   providers: [
     AppService,
@@ -162,6 +179,7 @@ import { WebsiteProvider } from './provider/website/website.provider';
     TokenProvider,
     TokenGuard,
     WebsiteProvider,
+    PipelineProvider,
   ],
 })
 export class AppModule implements NestModule {

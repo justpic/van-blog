@@ -2,9 +2,9 @@ import { useContext, useMemo, useState } from "react";
 import { SocialItem } from "../../api/getAllData";
 import { getIcon } from "../../utils/getIcon";
 import { Popover, ArrowContainer } from "react-tiny-popover";
-import { topUpper } from "../../utils/TopUpper";
-import ImageBoxFuture from "../ImageBoxFuture";
+import { capitalize } from "../../utils/capitalize";
 import { ThemeContext } from "../../utils/themeContext";
+import ImageBox from "../ImageBox";
 
 export default function (props: { item: SocialItem }) {
   const { theme } = useContext(ThemeContext);
@@ -72,12 +72,13 @@ export default function (props: { item: SocialItem }) {
                 className="card-shadow bg-white dark:bg-dark-2 dark:card-shadow-dark"
                 style={{ height: 280 }}
               >
-                <ImageBoxFuture
+                <ImageBox
                   alt="logo wechat qrcode"
                   src={weChatUrl}
                   width={200}
                   height={280}
                   className={""}
+                  lazyLoad={true}
                 />
               </div>
             </ArrowContainer>
@@ -99,7 +100,7 @@ export default function (props: { item: SocialItem }) {
             {getIcon(props.item.type, iconSize)}
           </span>
           <span className="inline-flex items-center ml-1">
-            {topUpper(props.item.type)}
+            {capitalize(props.item.type)}
           </span>
         </a>
       </Popover>
@@ -119,7 +120,7 @@ export default function (props: { item: SocialItem }) {
           {getIcon(props.item.type, iconSize)}
         </span>
         <span className="inline-flex items-center ml-1">
-          {topUpper(props.item.type)}
+          {capitalize(props.item.type)}
         </span>
       </a>
     );

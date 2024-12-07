@@ -1,4 +1,5 @@
 import StaticForm from '@/components/StaticForm';
+import WatchMarkForm from '@/components/WaterMarkForm';
 import { exportAllImgs, scanImgsOfArticles } from '@/services/van-blog/api';
 import { Alert, Button, Card, message, Modal, Table, Typography } from 'antd';
 import { useState } from 'react';
@@ -8,7 +9,10 @@ export default function () {
   const [exporting, setExporting] = useState(false);
   return (
     <>
-      <Card title="存储策略设置">
+      <Card title="图床功能设置">
+        <WatchMarkForm />
+      </Card>
+      <Card title="存储策略设置" style={{ marginTop: 8 }}>
         <StaticForm />
       </Card>
       <Card title="高级操作" style={{ marginTop: 8 }}>
@@ -33,7 +37,11 @@ export default function () {
                       dataSource={errorLinks}
                       size="small"
                       columns={[
-                        { title: '文章 ID', dataIndex: 'artcileId', key: 'artcileId' },
+                        {
+                          title: '文章 ID',
+                          dataIndex: 'artcileId',
+                          key: 'artcileId',
+                        },
                         { title: '标题', dataIndex: 'title', key: 'title' },
                         {
                           title: '链接',
@@ -43,7 +51,10 @@ export default function () {
                             return (
                               <Typography.Text
                                 copyable={val.length > 20}
-                                style={{ wordBreak: 'break-all', wordWrap: 'break-word' }}
+                                style={{
+                                  wordBreak: 'break-all',
+                                  wordWrap: 'break-word',
+                                }}
                               >
                                 {val}
                               </Typography.Text>

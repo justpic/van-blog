@@ -7,17 +7,15 @@
 #   Github: https://github.com/mereithhh/van-blog
 #========================================================
 
-## PS: 偷个懒，这个脚本是从 nezha 这个项目拷贝过来改的，如有问题欢迎 pr - -
-
 VANBLOG_BASE_PATH="/var/vanblog"
 VANBLOG_DATA_PATH="${VANBLOG_BASE_PATH}/data"
 VANBLOG_DATA_PATH_RAW="\/var\/vanblog\/data"
-VANBLOG_SCRIPT_VERSION="v0.1.2"
+VANBLOG_SCRIPT_VERSION="v0.3.2"
 
 COMPOSE_URL="https://vanblog.mereith.com/docker-compose-template.yml"
 SCRIPT_URL="https://vanblog.mereith.com/vanblog.sh"
 GITHUB_URL="dn-dao-github-mirror.daocloud.io"
-Get_Docker_URL="get.daocloud.io/docker"
+Get_Docker_URL="vanblog.mereith.com/docker.sh"
 Get_Docker_Argu=" -s docker --mirror Aliyun"
 
 red='\033[0;31m'
@@ -27,6 +25,18 @@ plain='\033[0m'
 export PATH=$PATH:/usr/local/bin
 
 os_arch=""
+
+
+delete_old_images() {
+  echo -e "> 删除旧镜像"
+  docker rmi -f mereith/van-blog-old
+}
+
+retag_old_images() {
+  echo -e "> 重命名旧镜像"
+  docker tag $(docker images | grep van-blog | awk '{print $3}') mereith/van-blog-old
+  # docker tag $(docker images | grep vanblog | awk '{print $3}') mereith/van-blog-old
+}
 
 pre_check() {
 
@@ -59,6 +69,41 @@ pre_check() {
     echo "不支持 riscv64 平台，目前只支持 arm64、amd64"
     exit 1
   fi
+
+      ## China_IP
+    if [[ -z "${CN}" ]]; then
+        if [[ $(curl -m 10 -s https://ipapi.co/json | grep 'China') != "" ]]; then
+            echo "根据ipapi.co提供的信息，当前IP可能在中国"
+            read -e -r -p "是否选用中国镜像完成安装? [Y/n] " input
+            case $input in
+                [yY][eE][sS] | [yY])
+                    echo "使用中国镜像"
+                    CN=true
+                ;;
+
+                [nN][oO] | [nN])
+                    echo "不使用中国镜像"
+                ;;
+                *)
+                    echo "使用中国镜像"
+                    CN=true
+                ;;
+            esac
+        fi
+    fi
+
+    if [[ -z "${CN}" ]]; then
+        Get_Docker_URL="get.docker.com"
+        GITHUB_URL="dn-dao-github-mirror.daocloud.io"
+        Get_Docker_Argu=" "
+        Docker_IMG="mereith\/van-blog:latest"
+    else
+        echo "使用中国镜像"
+        Get_Docker_URL="vanblog.mereith.com/docker.sh"
+        GITHUB_URL="github.com"
+        Get_Docker_Argu=" -s docker --mirror Aliyun"
+        Docker_IMG="registry.cn-beijing.aliyuncs.com\/mereith\/van-blog:latest"
+    fi
 
 }
 
@@ -147,25 +192,27 @@ install_vanblog() {
   if [[ $? != 0 ]]; then
     echo -e "正在安装 Docker"
     bash <(curl -sL https://${Get_Docker_URL}) ${Get_Docker_Argu} >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-      echo -e "${red}下载脚本失败，请检查本机能否连接 ${Get_Docker_URL}${plain}"
-      return 0
-    fi
     systemctl enable docker.service
     systemctl start docker.service
+    command -v docker >/dev/null 2>&1
+    if [[ $? != 0 ]]; then
+      echo -e "${red}Docker 安装失败${plain}"
+      exit 0
+    fi
     echo -e "${green}Docker${plain} 安装成功"
   fi
 
-  command -v docker-compose >/dev/null 2>&1
-  if [[ $? != 0 ]]; then
-    echo -e "正在安装 Docker Compose"
-    wget -t 2 -T 10 -O /usr/local/bin/docker-compose "https://${GITHUB_URL}/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-      echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_URL}${plain}"
-      return 0
-    fi
+
+  if [[ $(docker compose | grep 'Usage') != "" ]]; then
+    echo -e "未找到 docker-compose ，尝试使用 docker compose 创建别名"
+    echo 'docker compose $@' > /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
-    echo -e "${green}Docker Compose${plain} 安装成功"
+    command -v docker-compose >/dev/null 2>&1
+    if [[ $? != 0 ]]; then
+      echo -e "${red}Docker Compose 别名创建失败${plain}，请手动安装 Docker Compose"
+      exit 0
+    fi
+    echo -e "${green}Docker Compose${plain} 别名创建成功"
   fi
 
   config 0
@@ -191,7 +238,7 @@ config() {
 
   echo -e "正在下载编排文件"
   rm ${VANBLOG_BASE_PATH}/docker-compose-template.yaml >/dev/null 2>&1
-  wget -t 2 -T 10 -O ${VANBLOG_BASE_PATH}/docker-compose-template.yaml ${COMPOSE_URL} >/dev/null 2>&1
+  wget -t 2 --no-check-certificate -T 10 -O ${VANBLOG_BASE_PATH}/docker-compose-template.yaml ${COMPOSE_URL} >/dev/null 2>&1
   if [[ $? != 0 ]]; then
     echo -e "${red}下载脚本失败，请检查本机能否连接 ${COMPOSE_URL}${plain}"
     return 0
@@ -217,9 +264,9 @@ config() {
   if [[ -z "${vanblog_https_port}" ]]; then
     vanblog_https_port=443
   fi
-  if [[ -z "${vanblog_version}" ]]; then
-    vanblog_version="latest"
-  fi
+  # if [[ -z "${vanblog_version}" ]]; then
+  #   vanblog_version="latest"
+  # fi
 
   rm ${VANBLOG_BASE_PATH}/docker-compose.yaml >/dev/null 2>&1
   cp ${VANBLOG_BASE_PATH}/docker-compose-template.yaml ${VANBLOG_BASE_PATH}/docker-compose.yaml >/dev/null 2>&1
@@ -228,7 +275,8 @@ config() {
   sed -i "s/vanblog_http_port/${vanblog_http_port}/g" ${VANBLOG_BASE_PATH}/docker-compose.yaml
   sed -i "s/vanblog_https_port/${vanblog_https_port}/g" ${VANBLOG_BASE_PATH}/docker-compose.yaml
   # sed -i "s/vanblog_domains/${vanblog_domains}/g" ${VANBLOG_BASE_PATH}/docker-compose.yaml
-  sed -i "s/vanblog_version/${vanblog_version}/g" ${VANBLOG_BASE_PATH}/docker-compose.yaml
+  # sed -i "s/vanblog_version/${vanblog_version}/g" ${VANBLOG_BASE_PATH}/docker-compose.yaml
+  sed -i "s/vanblog_image/${Docker_IMG}/g" ${VANBLOG_BASE_PATH}/docker-compose.yaml
 
   mkdir -p $VANBLOG_DATA_PATH
 
@@ -245,7 +293,7 @@ restart() {
   echo -e "> 重启服务"
 
   cd $VANBLOG_BASE_PATH
-  docker-compose down
+  docker-compose down -v
   docker-compose up -d
   if [[ $? == 0 ]]; then
     echo -e "${green}VanBlog 重启成功${plain}"
@@ -260,10 +308,11 @@ restart() {
 }
 update() {
   echo -e "> 更新服务"
+  retag_old_images
 
   cd $VANBLOG_BASE_PATH
   docker-compose pull
-  docker-compose down
+  docker-compose down -v
   docker-compose up -d
   if [[ $? == 0 ]]; then
     echo -e "${green}VanBlog 更新并重启成功${plain}"
@@ -272,8 +321,16 @@ update() {
     echo -e "${red}重启失败，可能是因为启动时间超过了两秒，请稍后查看日志信息${plain}"
   fi
 
+  delete_old_images
+
   before_show_menu
 
+}
+
+reset_https() {
+    echo -e "> 重置 https 设置（需要先启动 vanblog）"
+    cd $VANBLOG_BASE_PATH && docker-compose exec vanblog node /app/cli/resetHttps.js
+    before_show_menu
 }
 
 start_vanblog() {
@@ -294,7 +351,7 @@ start_vanblog() {
 stop_vanblog() {
   echo -e "> 停止 VanBlog"
 
-  cd $VANBLOG_BASE_PATH && docker-compose down
+  cd $VANBLOG_BASE_PATH && docker-compose down -v
   if [[ $? == 0 ]]; then
     echo -e "${green}VanBlog 停止成功${plain}"
   else
@@ -334,7 +391,7 @@ uninstall_vanblog() {
   esac
 
   cd $VANBLOG_BASE_PATH &&
-    docker-compose down
+    docker-compose down -v
   rm -rf $VANBLOG_BASE_PATH
   docker rmi -f mereith/van-blog:latest >/dev/null 2>&1
   clean_all
@@ -350,6 +407,30 @@ clean_all() {
   fi
 }
 
+backup() {
+  echo -e "> 备份 vanblog"
+  name="vanblog-backup-$(date +"%Y%m%d%H%M%S").tar.gz"
+  cd $VANBLOG_BASE_PATH && tar czvf $name ./data
+  echo -e "${green}备份成功，文件名：${name}${plain} 所在路径：${VANBLOG_BASE_PATH}"
+}
+
+restore() {
+  echo -e "> 恢复 vanblog"
+  read -e -r -p "请输入备份文件名（含路径）: " path
+  # 检测空
+  if [ -z "$path" ]; then
+    echo -e "${red}输入为空${plain}"
+    exit 1
+  fi
+  # 停止 vanblog
+  echo -e "> 停止 vanblog 中..."
+  stop_vanblog
+  # 覆盖解压到目标路径
+  echo -e "> 覆盖解压到目标路径中..."
+  tar xzvf $path -C $VANBLOG_BASE_PATH
+  echo -e "${green}恢复成功${plain}，请手动启动 vanblog"
+}
+
 show_usage() {
   echo "VanBlog 管理脚本使用方法: "
   echo "--------------------------------------------------------"
@@ -362,6 +443,9 @@ show_usage() {
   echo "./vanblog.sh update                     - 更新 VanBlog"
   echo "./vanblog.sh log                        - 查看 VanBlog 日志"
   echo "./vanblog.sh uninstall                  - 卸载 VanBlog"
+  echo "./vanblog.sh reset_https                - 重置 https 设置"
+  echo "./vanblog.sh backup                     - 备份 VanBlog"
+  echo "./vanblog.sh restore                    - 恢复 VanBlog"
   echo "--------------------------------------------------------"
   echo "./vanblog.sh update_script              - 更新此脚本"
   echo "--------------------------------------------------------"
@@ -379,10 +463,15 @@ show_menu() {
     ${green}6.${plain}  更新
     ${green}7.${plain}  查看日志
     ${green}8.${plain}  卸载
+    ${green}9.${plain}  重置 https 设置
+    ${green}10.${plain} 备份 VanBlog
+    ${green}11.${plain} 恢复 VanBlog
     ————————————————-
+    ${green}20.${plain} 更新此脚本
+    ${green}30.${plain} 查看脚本使用说明
     ${green}0.${plain}  退出脚本
     "
-  echo && read -ep "请输入选择 [0-8]: " num
+  echo && read -ep "请输入选择 [0-30]: " num
 
   case "${num}" in
   0)
@@ -411,6 +500,21 @@ show_menu() {
     ;;
   8)
     uninstall_vanblog
+    ;;
+  9)
+    reset_https
+    ;;
+  10)
+    backup
+    ;;
+  11)
+    restore
+    ;;
+  20)
+    update_script
+    ;;
+  30)
+    show_usage
     ;;
   *)
     echo -e "${red}请输入正确的数字 [0-8]${plain}"
@@ -448,6 +552,15 @@ if [[ $# > 0 ]]; then
     ;;
   "uninstall")
     uninstall_vanblog 0
+    ;;
+  "reset_https")
+    reset_https 0
+    ;;
+  "backup")
+    backup 0
+    ;;
+  "restore")
+    restore 0
     ;;
   *) show_usage ;;
   esac

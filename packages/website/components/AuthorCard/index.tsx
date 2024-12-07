@@ -3,8 +3,8 @@ import { useContext, useEffect, useMemo } from "react";
 import Headroom from "headroom.js";
 import { SocialItem } from "../../api/getAllData";
 import SocialCard from "../SocialCard";
-import ImageBoxFuture from "../ImageBoxFuture";
 import { ThemeContext } from "../../utils/themeContext";
+import ImageBox from "../ImageBox";
 export interface AuthorCardProps {
   author: string;
   desc: string;
@@ -37,9 +37,8 @@ export default function (props: { option: AuthorCardProps }) {
     if (el) {
       const headroom = new Headroom(el, {
         classes: {
-          initial: `side-bar${
-            props.option.showSubMenu == "true" ? "" : " no-submenu"
-          }`,
+          initial: `side-bar${props.option.showSubMenu == "true" ? "" : " no-submenu"
+            }`,
           pinned: "side-bar-pinned",
           unpinned: "side-bar-unpinned",
           top: "side-bar-top",
@@ -53,12 +52,13 @@ export default function (props: { option: AuthorCardProps }) {
     <div id="author-card" className="sticky ">
       <div className="w-52 flex flex-col justify-center items-center bg-white pt-6  pb-4 card-shadow ml-2 dark:bg-dark dark:card-shadow-dark">
         <div className="px-10 flex flex-col justify-center items-center">
-          <ImageBoxFuture
+          <ImageBox
             alt="author logo"
-            className="rounded-full hover:rotate-180 duration-500 transition-all dark:filter-dark"
+            className="rounded-full  dark:filter-dark"
             src={logoUrl}
             width={120}
             height={120}
+            lazyLoad={false}
           />
 
           <div className="mt-2 font-semibold text-gray-600 mb-2 dark:text-dark">
@@ -69,34 +69,34 @@ export default function (props: { option: AuthorCardProps }) {
           </div>
           <div className="flex">
             <Link href="/timeline">
-              <a className="group flex flex-col justify-center items-center text-gray-600 text-sm px-1 dark:text-dark ">
+              <div className="group flex flex-col justify-center items-center text-gray-600 text-sm px-1 dark:text-dark ">
                 <div className="group-hover:text-gray-900 font-bold group-hover:font-black dark:group-hover:text-dark-hover">
                   {props.option.postNum}
                 </div>
                 <div className="group-hover:text-gray-900 group-hover:font-normal text-gray-500 dark:text-dark-light dark:group-hover:text-dark-hover">
                   日志
                 </div>
-              </a>
+              </div>
             </Link>
             <Link href="/category">
-              <a className="group flex flex-col justify-center items-center text-gray-600 text-sm px-1 dark:text-dark">
+              <div className="group flex flex-col justify-center items-center text-gray-600 text-sm px-1 dark:text-dark">
                 <div className="group-hover:text-gray-900 font-bold group-hover:font-black dark:group-hover:text-dark-hover">
                   {props.option.catelogNum}
                 </div>
                 <div className="group-hover:text-gray-900 group-hover:font-normal text-gray-500 dark:text-dark-light dark:group-hover:text-dark-hover">
                   分类
                 </div>
-              </a>
+              </div>
             </Link>
             <Link href="/tag">
-              <a className="group flex flex-col justify-center items-center text-gray-600 text-sm px-1 dark:text-dark">
+              <div className="group flex flex-col justify-center items-center text-gray-600 text-sm px-1 dark:text-dark">
                 <div className="group-hover:text-gray-900 font-bold group-hover:font-black dark:group-hover:text-dark-hover">
                   {props.option.tagNum}
                 </div>
                 <div className=" group-hover:text-gray-900 group-hover:font-normal text-gray-500 dark:text-dark-light dark:group-hover:text-dark-hover">
                   标签
                 </div>
-              </a>
+              </div>
             </Link>
           </div>
         </div>
